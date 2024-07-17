@@ -8,7 +8,7 @@ To run the web app with bat file that already contains Python scripts, follow th
 
 2. You can directly run the bat file, which can be found in the base directory of the project.
 
-3. Double-click the bat file (e.g., "RunHistoris.bat"). This will execute the Python scripts included in the bat file.
+3. Double-click the bat file (e.g., `RunHistoris.bat`). This will execute the Python scripts included in the bat file.
 
 To install the required libraries from the `requirements.txt` file, follow these steps:
 
