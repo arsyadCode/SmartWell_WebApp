@@ -61,47 +61,29 @@ def update_figures(attr, old, new):
     selected_data2 = df2.loc[df2['Universal'] == dropdown.value]
     plot = dfPlot.loc[dfPlot['Universal'] == dropdown.value]
 
-    # Ensure "All" checkbox behavior
     if 0 in figures_checkbox.active:
-        if len(figures_checkbox.active) <= len(figures_checkbox.labels):
-            figures_checkbox.active = list(range(len(figures_checkbox.labels)))
-        else:
-            figures_checkbox.active = [i for i in figures_checkbox.active if i != 0]
+        figures_checkbox.active = list(range(len(figures_checkbox.labels))) if len(figures_checkbox.active) <= len(figures_checkbox.labels) else [i for i in figures_checkbox.active if i != 0]
     else:
         figures_checkbox.active = [i for i in figures_checkbox.active if i != 0]
 
-    # Initialize list to store selected figures
     selected_figures = []
 
-    # Generate figures based on checkbox selection
     for i in figures_checkbox.active:
         if figures_checkbox.labels[i] == 'Oil Rate':
-            figOil = create_figure(950, 225, selected_data['MDATE'], selected_data['OIL_per_day'],
-                                   plot['DATE_STAMP'], plot['CORR_OIL_RATE_STBD'], 'Oil Rate', "darkgoldenrod")
-            selected_figures.append(figOil)
+            selected_figures.append(create_figure(950, 225, selected_data['MDATE'], selected_data['OIL_per_day'], plot['DATE_STAMP'], plot['CORR_OIL_RATE_STBD'], 'Oil Rate', "darkgoldenrod"))
         elif figures_checkbox.labels[i] == 'Water Rate':
-            figWater = create_figure(950, 225, selected_data['MDATE'], selected_data['WATER_per_day'],
-                                     plot['DATE_STAMP'], plot['CORR_WTR_RATE_STBD'], 'Water Rate', "dodgerblue")
-            selected_figures.append(figWater)
+            selected_figures.append(create_figure(950, 225, selected_data['MDATE'], selected_data['WATER_per_day'], plot['DATE_STAMP'], plot['CORR_WTR_RATE_STBD'], 'Water Rate', "dodgerblue"))
         elif figures_checkbox.labels[i] == 'Gas Rate':
-            figGas = create_figure(950, 225, selected_data['MDATE'], selected_data['GAS_per_day'],
-                                   plot['DATE_STAMP'], plot['CORR_GAS_RES_RATE_MMSCFD'], 'Gas Rate', "darkturquoise")
-            selected_figures.append(figGas)
+            selected_figures.append(create_figure(950, 225, selected_data['MDATE'], selected_data['GAS_per_day'], plot['DATE_STAMP'], plot['CORR_GAS_RES_RATE_MMSCFD'], 'Gas Rate', "darkturquoise"))
         elif figures_checkbox.labels[i] == 'WHP Rate':
-            figWHP = create_figure(950, 225, selected_data2['START_TIME'], selected_data2['WHP'],
-                                   plot['DATE_STAMP'], plot['WHP_BARG'], 'WHP Rate', "darkslateblue")
-            selected_figures.append(figWHP)
+            selected_figures.append(create_figure(950, 225, selected_data2['START_TIME'], selected_data2['WHP'], plot['DATE_STAMP'], plot['WHP_BARG'], 'WHP Rate', "darkslateblue"))
         elif figures_checkbox.labels[i] == 'WHT Rate':
-            figWHT = create_figure(950, 225, selected_data2['START_TIME'], selected_data2['WHT'],
-                                   plot['DATE_STAMP'], plot['WHT_DEG_C'], 'WHT Rate', "darkslateblue")
-            selected_figures.append(figWHT)
+            selected_figures.append(create_figure(950, 225, selected_data2['START_TIME'], selected_data2['WHT'], plot['DATE_STAMP'], plot['WHT_DEG_C'], 'WHT Rate', "darkslateblue"))
 
-    # Determine layout of figures
     num_selected_figures = len(selected_figures)
     num_cols = 2
     num_rows = (num_selected_figures + num_cols - 1) // num_cols
 
-    # Create layout components
     layout_components = [row(dropdown, figures_checkbox)]
     start_idx = 0
     for row_idx in range(num_rows):
@@ -109,7 +91,6 @@ def update_figures(attr, old, new):
         layout_components.append(row(*row_figures, sizing_mode='stretch_width'))
         start_idx += num_cols
 
-    # Update the Panel dashboard layout
     dashboard[:] = [header, column(*layout_components)]
 
 # Initial layout
