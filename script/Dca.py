@@ -1,12 +1,14 @@
 import dash
-from dash import dcc, html
-from dash.dependencies import Input, Output
+import os, webbrowser
 import dash_bootstrap_components as dbc
 import pandas as pd
 import numpy as np
 import plotly.graph_objects as go
-from datetime import datetime
 import curve_cum_function as ccf
+from dash import dcc, html
+from dash.dependencies import Input, Output
+from datetime import datetime
+from sklearn.linear_model import LinearRegression
 
 app = dash.Dash(__name__, external_stylesheets=[dbc.themes.BOOTSTRAP])
 app.title = 'DCA'
@@ -122,4 +124,6 @@ def update_plots(well_name, start_date, end_date, foil_date, months_end_date):
     return oil_fig, gas_fig
 
 if __name__ == '__main__':
+    if os.environ.get("WERKZEUG_RUN_MAIN") == "true":
+        webbrowser.open_new("http://127.0.0.1:8050/")
     app.run_server(debug=True)
