@@ -75,7 +75,7 @@ def update_sliders(well_name):
     df['DATE_STAMP'] = pd.to_datetime(df['DATE_STAMP'], format='%d/%m/%Y', dayfirst=True)
     max_date = df['DATE_STAMP'].max()
     df_filtered = df[df['DATE_STAMP'] <= max_date]
-    marks = {i: {'label': '', 'style': {'display': 'none'}} for i, date in enumerate(df_filtered['DATE_STAMP'])}
+    marks = {i: {'label': str(date.date()), 'style': {'writing-mode': 'vertical-rl'}} for i, date in enumerate(df_filtered['DATE_STAMP'])}
     return len(df_filtered) - 1, marks, len(df_filtered) - 1, marks
 
 @app.callback(
