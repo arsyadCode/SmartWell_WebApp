@@ -48,7 +48,7 @@ def process_data(excel_file, well_name, initial_date, final_date, rate_column, r
     initial_rate = df_filtered[rate_column].iloc[0]
     final_rate = df_filtered[rate_column].iloc[-1]
 
-    decline_exponent = [i/10 for i in range(1, 10)]
+    decline_exponent = [i/10 for i in range(1, 11)]
     error_values = {}
 
     for b in decline_exponent:
