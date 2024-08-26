@@ -6,7 +6,7 @@ import numpy as np
 import plotly.graph_objects as go
 import curve_cum_function as ccf
 from dash import dcc, html
-from dash.dependencies import Input, Output, State
+from dash.dependencies import Input, Output
 from datetime import datetime
 
 app = dash.Dash(__name__, external_stylesheets=[dbc.themes.BOOTSTRAP])
@@ -39,12 +39,6 @@ app.layout = dbc.Container([
             dcc.Input(id='months-end-date', type='number', value=120, min=1)
         ], width=2),
         dbc.Col([
-            html.Label('Rate Limit Value:'),
-            dcc.Input(id='limit-value', type='number', value=0.0, step=0.1)
-        ], width=2),
-    ]),
-    dbc.Row([
-        dbc.Col([
             html.Label('Adjust b Value:'),
             dcc.Slider(
                 id='b-value-slider',
@@ -55,7 +49,7 @@ app.layout = dbc.Container([
                 marks={0: '0.000', 0.5: '0.500', 1: '1.000'},
                 tooltip={"placement": "bottom", "always_visible": True}
             )
-        ], width=4),
+        ], width=2),
     ]),
     dbc.Row([
         dbc.Col(dcc.Graph(id='oil-plot'), width=12),
@@ -72,11 +66,6 @@ app.layout = dbc.Container([
                 marks={},
                 tooltip={"placement": "bottom", "always_visible": True}
             )
-        ], width=12),
-    ]),
-    dbc.Row([
-        dbc.Col([
-            html.Div(id='alert', children=[])
         ], width=12),
     ])
 ])
@@ -101,16 +90,14 @@ def update_slider(well_name):
 
 @app.callback(
     Output('oil-plot', 'figure'),
-    Output('alert', 'children'),
     Input('well-name', 'value'), 
     Input('foil-date-picker', 'date'),
     Input('months-end-date', 'value'),
     Input('date-slider', 'value'),
     Input('oil-rate-intervention', 'value'),
-    Input('b-value-slider', 'value'),
-    Input('limit-value', 'value')
+    Input('b-value-slider', 'value')
 )
-def update_plots(well_name, foil_date, months_end_date, slider_value, rate_intervention, b_value, limit_value):
+def update_plots(well_name, foil_date, months_end_date, slider_value, rate_intervention, b_value):
     foil_date = pd.to_datetime(foil_date)
     
     df = pd.read_excel(excel_file, sheet_name=well_name)
@@ -145,32 +132,12 @@ def update_plots(well_name, foil_date, months_end_date, slider_value, rate_inter
     
     if b_value == 0.000:
         oil_fig.add_trace(go.Scatter(x=forecast_df['DATE'], y=forecast_df['Forecast_Oil_Exponential'], mode='lines', name=f'Exponential Forecast (b={b_value:.3f}, qi={qi:.2f})', line=dict(color='LightBlue')))
-        crossed = forecast_df[forecast_df['Forecast_Oil_Exponential'] <= limit_value]
     elif b_value == 1.000:
         oil_fig.add_trace(go.Scatter(x=forecast_df['DATE'], y=forecast_df['Forecast_Oil_Harmonic'], mode='lines', name=f'Harmonic Forecast (b={b_value:.3f}, qi={qi:.2f})', line=dict(color='LightSalmon')))
-        crossed = forecast_df[forecast_df['Forecast_Oil_Harmonic'] <= limit_value]
     else:
         oil_fig.add_trace(go.Scatter(x=forecast_df['DATE'], y=forecast_df['Forecast_Oil_Hyperbolic'], mode='lines', name=f'Hyperbolic Forecast (b={b_value:.3f}, qi={qi:.2f})', line=dict(color='LightGreen')))
-        crossed = forecast_df[forecast_df['Forecast_Oil_Hyperbolic'] <= limit_value]
 
-    # Add horizontal line at limit value
-    oil_fig.add_trace(go.Scatter(x=[foil_date, end_date], y=[limit_value, limit_value], mode='lines', name=f'Rate Limit ({limit_value} bopd)', line=dict(color='red', dash='dash')))
-
-    # Check if the forecast crosses the limit value
-    alert_message = []
-    if not crossed.empty:
-        crossing_date = crossed['DATE'].iloc[0]
-        alert_message.append(
-            dbc.Alert(
-                [
-                    "Alert: Forecast crosses limit on ",
-                    html.Span(crossing_date.strftime("%Y-%m-%d"), style={'fontWeight': 'bold'}),
-                ],
-                color='danger', dismissable=True, duration=7000,
-            )
-        )
-
-        oil_fig.add_trace(go.Scatter(x=[start_date], y=[marker_y], mode='markers', name='Initial Date', marker=dict(color='black', size=7)))
+    oil_fig.add_trace(go.Scatter(x=[start_date], y=[marker_y], mode='markers', name='Initial Date', marker=dict(color='black', size=7)))
     oil_fig.update_layout(
         title=f'Oil Rate Comparison of Decline Models Well {well_name}',
         xaxis_title='Date',
@@ -179,7 +146,7 @@ def update_plots(well_name, foil_date, months_end_date, slider_value, rate_inter
         legend_title="Legend"
     )
 
-    return oil_fig, alert_message
+    return oil_fig
 
 if __name__ == '__main__':
     if os.environ.get("WERKZEUG_RUN_MAIN") == "true":

@@ -169,8 +169,9 @@ def update_plots(well_name, foil_date, months_end_date, slider_value, rate_inter
                 color='danger', dismissable=True, duration=7000,
             )
         )
+    
+    oil_fig.add_trace(go.Scatter(x=[start_date], y=[marker_y], mode='markers', name='Initial Date', marker=dict(color='black', size=7)))
 
-        oil_fig.add_trace(go.Scatter(x=[start_date], y=[marker_y], mode='markers', name='Initial Date', marker=dict(color='black', size=7)))
     oil_fig.update_layout(
         title=f'Oil Rate Comparison of Decline Models Well {well_name}',
         xaxis_title='Date',
