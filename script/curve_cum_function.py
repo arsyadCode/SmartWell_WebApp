@@ -40,7 +40,6 @@ def process_data(excel_file, well_name, initial_date, final_date, rate_column, r
     df = pd.read_excel(excel_file, sheet_name=well_name)
     df['DATE_STAMP'] = pd.to_datetime(df['DATE_STAMP'], format='%d/%m/%Y', dayfirst=True)
     df['TIME'] = range(len(df))
-    # df['CUMULATIVE_PRODUCTION'] = df[rate_column].cumsum() * 30
 
     df_filtered = df[(df['DATE_STAMP'] >= initial_date) & (df['DATE_STAMP'] <= final_date) & (df[rate_column] != 0)].copy()
     df_filtered['TIME'] = range(len(df_filtered))
