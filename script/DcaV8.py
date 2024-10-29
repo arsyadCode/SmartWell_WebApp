@@ -16,7 +16,6 @@ excel_file = './Data/data_resampling_cumProd.xlsx'
 xls = pd.ExcelFile(excel_file)
 sheet_names = xls.sheet_names
 
-# Initial empty DataFrame to store table data
 table_data = pd.DataFrame(columns=["Well Name", "Start Date", "End Date", "Reserves", "Cut Off Date"])
 
 app.layout = dbc.Container([
@@ -85,7 +84,6 @@ app.layout = dbc.Container([
             html.Div(id='alert', children=[])
         ], width=12),
     ]),
-    # Data Table
     dash_table.DataTable(
         id="data-table",
         columns=[
@@ -101,13 +99,11 @@ app.layout = dbc.Container([
         style_table={'margin-top': '20px'}
     ),
     
-    # Buttons for updating and downloading data
     html.Div([
         html.Button("Update data", id="update-button", n_clicks=0),
         html.Button("Download data table", id="download-button", n_clicks=0)
     ], style={"display": "flex", "gap": "10px", "margin-top": "10px"}),
 
-    # Download component
     dcc.Download(id="download-csv")
 ])
 
@@ -129,24 +125,12 @@ def update_slider(well_name):
 
     return slider_min, slider_max, marks, slider_value
 
-# @app.callback(
-#     Output('oil-plot', 'figure'),
-#     Output('alert', 'children'),
-#     Output('reserves-output', 'children'),
-#     Input('well-name', 'value'), 
-#     Input('foil-date-picker', 'date'),
-#     Input('months-end-date', 'value'),
-#     Input('date-slider', 'value'),
-#     Input('oil-rate-intervention', 'value'),
-#     Input('b-value-slider', 'value'),
-#     Input('limit-value', 'value')
-# )
 @app.callback(
     Output('oil-plot', 'figure'),
     Output('alert', 'children'),
     Output('reserves-output', 'children'),
-    Output('data-table', 'data'),  # For updating data table
-    Input('update-button', 'n_clicks'),  # Trigger by update button click
+    Output('data-table', 'data'),
+    Input('update-button', 'n_clicks'),
     Input('well-name', 'value'),
     Input('foil-date-picker', 'date'),
     Input('months-end-date', 'value'),
@@ -230,10 +214,8 @@ def update_plots(n_clicks, well_name, foil_date, months_end_date, slider_value, 
         reserves_output = "Reserves (Hyperbolic): ", html.Span(f"{reserves_hyper:.2f} stb", style={'fontWeight': 'bold'})
         val_reserves = reserves_hyper
 
-    # Add horizontal line at limit value
     oil_fig.add_trace(go.Scatter(x=[foil_date, end_date], y=[limit_value, limit_value], mode='lines', name=f'Rate Limit ({limit_value} bopd)', line=dict(color='red', dash='dash')))
 
-    # Check if the forecast crosses the limit value
     alert_message = []
     if not crossed.empty:
         crossing_date = crossed['DATE'].iloc[0]
@@ -257,7 +239,6 @@ def update_plots(n_clicks, well_name, foil_date, months_end_date, slider_value, 
         legend_title="Legend"
     )
 
-    # New row data based on current state
     new_row = {
         "Well Name": well_name,
         "Start Date": start_date.strftime('%d-%m-%Y'),
