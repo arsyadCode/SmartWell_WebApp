@@ -33,7 +33,7 @@ app.layout = dbc.Container([
             )
         ], width=2),
         dbc.Col([
-            html.Label('Rate Intervention:'),
+            html.Label('Rate Intervention (bopd):'),
             dcc.Input(id='oil-rate-intervention', type='number', value=0, step=50)
         ], width=2),
         dbc.Col([
@@ -41,7 +41,7 @@ app.layout = dbc.Container([
             dcc.Input(id='months-end-date', type='number', value=120, min=1)
         ], width=2),
         dbc.Col([
-            html.Label('Rate Limit Value:'),
+            html.Label('Rate Limit Value (bopd):'),
             dcc.Input(id='limit-value', type='number', value=0.0, step=0.1)
         ], width=2),
     ]),
@@ -90,7 +90,9 @@ app.layout = dbc.Container([
             {"name": "Well Name", "id": "Well Name"},
             {"name": "Start Date", "id": "Start Date"},
             {"name": "End Date", "id": "End Date"},
-            {"name": "Reserves", "id": "Reserves"},
+            {"name": "Start Forecast Date", "id": "Start Forecast Date"},
+            {"name": "Reserves (stb)", "id": "Reserves (stb)"},
+            {"name": "Rate Intervention (bopd)", "id": "Rate Intervention (bopd)"},
             {"name": "Cut Off Date", "id": "Cut Off Date"}
         ],
         data=table_data.to_dict("records"),
@@ -243,12 +245,19 @@ def update_plots(n_clicks, well_name, foil_date, months_end_date, slider_value, 
         "Well Name": well_name,
         "Start Date": start_date.strftime('%d-%m-%Y'),
         "End Date": end_dates.strftime('%d-%m-%Y'),
-        "Reserves": f"{val_reserves:.5f} stb",
+        "Start Forecast Date": foil_date.strftime('%d-%m-%Y'),
+        "Reserves (stb)": f"{val_reserves:.5f}",
+        "Rate Intervention (bopd)": rate_intervention,
         "Cut Off Date": crossing_date.strftime('%d-%m-%Y') if not crossed.empty else "N/A"
     }
     
-    if n_clicks and new_row not in rows:
-        rows.append(new_row)
+    if n_clicks:
+        existing_row = next((row for row in rows if row['Well Name'] == new_row['Well Name']), None)
+        if existing_row:
+            rows[rows.index(existing_row)] = new_row
+        else:
+            rows.append(new_row)
+        rows = sorted(rows, key=lambda x: float(x['Reserves (stb)']), reverse=True)
 
     return oil_fig, alert_message, reserves_output, rows
 
