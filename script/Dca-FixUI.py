@@ -22,8 +22,8 @@ selected_b_value = 0.5
 app.layout = dbc.Container([
     html.Div(style={'display': 'flex', 'gap': 28, 'padding': '50px'}, children=[
         html.Div(style={'display': 'flex', 'flexDirection': 'column', 'gap': '10px'}, children=[
-            html.Div(className='feature-container', style={'border': '1px solid #3F849B', 'padding': '0', 'borderBottomLeftRadius': '16px', 'borderBottomRightRadius': '16px', 'width': '174px', 'height': '123px'}, children=[
-                html.H1('Plot Type', className='Feature-title', style={'color': 'white', 'fontWeight': '700', 'fontSize': '16px', 'padding': '8px 17px', 'backgroundColor': '#3F849B', 'borderBottomLeftRadius': '10px', 'borderBottomRightRadius': '10px'}),
+            html.Div(className='feature-container', style={'border': '1px solid #3F849B', 'padding': '0', 'borderRadius': '16px', 'width': '174px', 'height': '123px'}, children=[
+                html.H1('Plot Type', className='Feature-title', style={'color': 'white', 'fontWeight': '700', 'fontSize': '16px', 'padding': '8px 17px', 'backgroundColor': '#3F849B', 'borderRadius': '10px'}),
                 html.Div(style={'padding': '10px 25px'}, children=[
                     dcc.Checklist(
                         id='plot-type',
@@ -37,8 +37,8 @@ app.layout = dbc.Container([
                     ),
                 ])
             ]),
-            html.Div(className='feature-container', style={'border': '1px solid #3F849B', 'padding': '0', 'borderBottomLeftRadius': '16px', 'borderBottomRightRadius': '16px', 'width': '174px', 'height': '93px'}, children=[
-                html.H1('Legend', className='Feature-title', style={'color': 'white', 'fontWeight': '700', 'fontSize': '16px', 'padding': '8px 17px', 'backgroundColor': '#3F849B', 'borderBottomLeftRadius': '10px', 'borderBottomRightRadius': '10px'}),
+            html.Div(className='feature-container', style={'border': '1px solid #3F849B', 'padding': '0', 'borderRadius': '16px', 'width': '174px', 'height': '93px'}, children=[
+                html.H1('Legend', className='Feature-title', style={'color': 'white', 'fontWeight': '700', 'fontSize': '16px', 'padding': '8px 17px', 'backgroundColor': '#3F849B', 'borderRadius': '10px'}),
                 html.Div(style={'padding': '10px 25px'}, children=[
                     dcc.Checklist(
                         id='legend-status',
@@ -51,8 +51,8 @@ app.layout = dbc.Container([
                     ),
                 ])
             ]),
-            html.Div(className='feature-container', style={'border': '1px solid #3F849B', 'padding': '0', 'borderBottomLeftRadius': '16px', 'borderBottomRightRadius': '16px', 'width': '174px', 'height': '153px'}, children=[
-                html.H1('Models', className='Feature-title', style={'color': 'white', 'fontWeight': '700', 'fontSize': '16px', 'padding': '8px 17px', 'backgroundColor': '#3F849B', 'borderBottomLeftRadius': '10px', 'borderBottomRightRadius': '10px'}),
+            html.Div(className='feature-container', style={'border': '1px solid #3F849B', 'padding': '0', 'borderRadius': '16px', 'width': '174px', 'height': '153px'}, children=[
+                html.H1('Models', className='Feature-title', style={'color': 'white', 'fontWeight': '700', 'fontSize': '16px', 'padding': '8px 17px', 'backgroundColor': '#3F849B', 'borderRadius': '10px'}),
                 html.Div(style={'padding': '10px 25px'}, children=[
                     dcc.RadioItems(
                         id="selected-b-options",
@@ -67,9 +67,18 @@ app.layout = dbc.Container([
                     ),
                 ])
             ]),
-            html.Div(className='feature-container', style={'border': '1px solid #3F849B', 'padding': '0', 'borderBottomLeftRadius': '16px', 'borderBottomRightRadius': '16px', 'width': '174px', 'minHeight': '123px'}, children=[
-                html.H1('Settings', className='Feature-title', style={'color': 'white', 'fontWeight': '700', 'fontSize': '16px', 'padding': '8px 17px', 'backgroundColor': '#3F849B', 'borderBottomLeftRadius': '10px', 'borderBottomRightRadius': '10px'}),
+            html.Div(className='feature-container', style={'border': '1px solid #3F849B', 'padding': '0', 'borderRadius': '16px', 'width': '174px', 'minHeight': '123px'}, children=[
+                html.H1('Settings', className='Feature-title', style={'color': 'white', 'fontWeight': '700', 'fontSize': '16px', 'padding': '8px 17px', 'backgroundColor': '#3F849B', 'borderRadius': '10px'}),
                 html.Div(style={'padding': '10px', 'display': 'flex', 'flexDirection': 'column', 'gap': '10px'}, children=[
+                    html.Div(style={'fontWeight': '400', 'fontSize': '14px', 'color': '#616161'}, children=[
+                        html.Label('Select Well:', style={'fontWeight': '400', 'fontSize': '14px', 'color': '#616161'}),
+                        dcc.Dropdown(
+                            id='well-name', 
+                            options=[{'label': name, 'value': name} for name in sheet_names], 
+                            value='B-L-18',
+                            clearable=False
+                        )
+                    ]),
                     html.Div(style={'width': '100%'}, children=[
                         html.Label('Start Forecast Date:', style={'fontWeight': '400', 'fontSize': '14px', 'color': '#616161'}),
                         dcc.DatePickerSingle(
@@ -109,18 +118,10 @@ app.layout = dbc.Container([
                             style={'border': '1px solid #616161', 'borderRadius': '6px', 'width': '134px', 'height': '25px', 'color': 'black', 'overflow': 'hidden', 'display': 'flex', 'alignItems': 'center'}
                         )
                     ]),
-                    html.Div(style={'fontWeight': '400', 'fontSize': '14px', 'color': '#616161'}, children=[
-                        html.Label('Select Well:', style={'fontWeight': '400', 'fontSize': '14px', 'color': '#616161'}),
-                        dcc.Dropdown(
-                            id='well-name', 
-                            options=[{'label': name, 'value': name} for name in sheet_names], 
-                            value='B-L-18',
-                        )
-                    ]),
                 ])
             ]), 
         ]),
-        html.Div(style={'border': '1px solid grey', 'padding': '21px', 'borderBottomLeftRadius': '30px', 'borderBottomRightRadius': '30px'}, children=[
+        html.Div(style={'border': '1px solid grey', 'padding': '21px', 'borderRadius': '30px'}, children=[
             dbc.Row([
                 dbc.Col([
                     html.Label('Adjust b Value:'),
@@ -384,4 +385,4 @@ def download_table(n_clicks, rows):
 if __name__ == '__main__':
     if os.environ.get("WERKZEUG_RUN_MAIN") == "true":
         webbrowser.open_new("http://127.0.0.1:8050/")
-    app.run_server(debug=True)
+    app.run_server(debug=True, dev_tools_ui=False)
