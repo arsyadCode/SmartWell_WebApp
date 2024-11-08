@@ -70,22 +70,13 @@ app.layout = dbc.Container([
             html.Div(className='feature-container', style={'border': '1px solid #3F849B', 'padding': '0', 'borderRadius': '16px', 'width': '174px', 'minHeight': '123px'}, children=[
                 html.H1('Settings', className='Feature-title', style={'color': 'white', 'fontWeight': '700', 'fontSize': '16px', 'padding': '8px 17px', 'backgroundColor': '#3F849B', 'borderRadius': '10px'}),
                 html.Div(style={'padding': '10px', 'display': 'flex', 'flexDirection': 'column', 'gap': '10px'}, children=[
-                    html.Div(style={'fontWeight': '400', 'fontSize': '14px', 'color': '#616161'}, children=[
-                        html.Label('Select Well:', style={'fontWeight': '400', 'fontSize': '14px', 'color': '#616161'}),
-                        dcc.Dropdown(
-                            id='well-name', 
-                            options=[{'label': name, 'value': name} for name in sheet_names], 
-                            value='B-L-18',
-                            clearable=False
-                        )
-                    ]),
                     html.Div(style={'width': '100%'}, children=[
                         html.Label('Start Forecast Date:', style={'fontWeight': '400', 'fontSize': '14px', 'color': '#616161'}),
                         dcc.DatePickerSingle(
                             id='foil-date-picker',
                             date=datetime(2024, 4, 1),
                             display_format='DD/MM/YYYY', 
-                            style={ 'border': '1px solid #616161', 'borderRadius': '6px', 'width': '134px', 'height': '35px', 'color': 'black', 'overflow': 'hidden', 'display': 'flex', 'alignItems': 'center' },
+                            style={ 'border': '1px solid #616161', 'borderRadius': '6px', 'width': '134px', 'height': '30px', 'color': 'black', 'overflow': 'hidden', 'display': 'flex', 'alignItems': 'center' },
                         )
                     ]),
                     html.Div(style={'fontWeight': '400', 'fontSize': '14px', 'color': '#616161'}, children=[
@@ -95,7 +86,7 @@ app.layout = dbc.Container([
                             type='number', 
                             value=120, 
                             min=1, 
-                            style={'border': '1px solid #616161', 'borderRadius': '6px', 'width': '134px', 'height': '25px', 'color': 'black', 'overflow': 'hidden', 'display': 'flex', 'alignItems': 'center'}
+                            style={'border': '1px solid #616161', 'borderRadius': '6px', 'width': '134px', 'height': '30px', 'color': 'black', 'overflow': 'hidden', 'display': 'flex', 'alignItems': 'center'}
                         )
                     ]),
                     html.Div(style={'fontWeight': '400', 'fontSize': '14px', 'color': '#616161'}, children=[
@@ -105,7 +96,7 @@ app.layout = dbc.Container([
                             type='number', 
                             value=0, 
                             step=50, 
-                            style={'border': '1px solid #616161', 'borderRadius': '6px', 'width': '134px', 'height': '25px', 'color': 'black', 'overflow': 'hidden', 'display': 'flex', 'alignItems': 'center'}
+                            style={'border': '1px solid #616161', 'borderRadius': '6px', 'width': '134px', 'height': '30px', 'color': 'black', 'overflow': 'hidden', 'display': 'flex', 'alignItems': 'center'}
                         )
                     ]),
                     html.Div(style={'fontWeight': '400', 'fontSize': '14px', 'color': '#616161'}, children=[
@@ -115,7 +106,7 @@ app.layout = dbc.Container([
                             type='number', 
                             value=0.0, 
                             step=0.1, 
-                            style={'border': '1px solid #616161', 'borderRadius': '6px', 'width': '134px', 'height': '25px', 'color': 'black', 'overflow': 'hidden', 'display': 'flex', 'alignItems': 'center'}
+                            style={'border': '1px solid #616161', 'borderRadius': '6px', 'width': '134px', 'height': '30px', 'color': 'black', 'overflow': 'hidden', 'display': 'flex', 'alignItems': 'center'}
                         )
                     ]),
                 ])
@@ -184,7 +175,23 @@ app.layout = dbc.Container([
             ], style={"display": "flex", "gap": "10px", "margin-top": "10px"}),
 
             dcc.Download(id="download-csv")
-        ])
+        ]),
+        html.Div(style={'display': 'flex', 'flexDirection': 'column', 'gap': '10px'}, children=[
+            html.Div(className='feature-container', style={'border': '1px solid #3F849B', 'padding': '0', 'borderRadius': '16px', 'width': '229px', 'minHeight': '40px'}, children=[
+                html.H1('Objects', className='Feature-title', style={'color': 'white', 'fontWeight': '700', 'fontSize': '16px', 'padding': '8px 17px', 'backgroundColor': '#3F849B', 'borderRadius': '10px'}),
+                html.Div(style={'padding': '10px', 'display': 'flex', 'flexDirection': 'column', 'gap': '10px'}, children=[
+                    html.Div(style={'fontWeight': '400', 'fontSize': '14px', 'color': '#616161'}, children=[
+                        html.Label('Select Well:', style={'fontWeight': '400', 'fontSize': '14px', 'color': '#616161'}),
+                        dcc.Dropdown(
+                            id='well-name', 
+                            options=[{'label': name, 'value': name} for name in sheet_names], 
+                            value='B-L-18',
+                            clearable=False
+                        )
+                    ]),
+                ])
+            ]), 
+        ]),
     ])
 ])
 
@@ -297,7 +304,7 @@ def update_plots(n_clicks, well_name, foil_date, months_end_date, slider_value, 
 
     oil_fig = go.Figure()
     if scatter: 
-        oil_fig.add_trace(go.Scatter(x=df['DATE_STAMP'], y=df['CORR_OIL_RATE_STBD'], mode='markers', name='Data', marker=dict(color='red', size=5), showlegend=show_legend and scatter))
+        oil_fig.add_trace(go.Scatter(x=df['DATE_STAMP'], y=df['CORR_OIL_RATE_STBD'], mode='markers', name='Data', marker=dict(color='brown', size=5), showlegend=show_legend and scatter))
     if line: 
         oil_fig.add_trace(go.Scatter(x=df_oil['DATE_STAMP'], y=oil_exp_model, mode='lines', name='Exponential Model', line=dict(color='blue'), showlegend=show_legend and line))
         oil_fig.add_trace(go.Scatter(x=df_oil['DATE_STAMP'], y=oil_hyper_model, mode='lines', name=f'Hyperbolic Model (best b = {best_b_oil})', line=dict(color='green'), showlegend=show_legend and line))
@@ -385,4 +392,4 @@ def download_table(n_clicks, rows):
 if __name__ == '__main__':
     if os.environ.get("WERKZEUG_RUN_MAIN") == "true":
         webbrowser.open_new("http://127.0.0.1:8050/")
-    app.run_server(debug=True, dev_tools_ui=False)
+    app.run_server(debug=True, dev_tools_ui=True)
