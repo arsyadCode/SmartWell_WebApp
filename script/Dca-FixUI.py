@@ -3,7 +3,7 @@ import os, webbrowser, base64
 import dash_bootstrap_components as dbc
 import pandas as pd
 import numpy as np
-import plotly.graph_objects as go
+import plotly.express as px
 import curve_cum_function as ccf
 from dash import dcc, html, dash_table, callback_context
 from dash.dependencies import Input, Output, State, ALL
@@ -88,7 +88,7 @@ app.layout = dbc.Container([
                     id="file-upload",
                     children=[
                         html.Img(src="assets/uploadv2.png"),
-                        html.H6("Browse file (.csv) to upload")
+                        html.H6("Browse file (.csv) or (.xlsx) to upload")
                     ],
                     style={
                         'width': '779px', 'height': '286px', 'lineHeight': '60px', 'display': 'flex', 'flexDirection': 'column',
@@ -290,12 +290,9 @@ app.layout = dbc.Container([
 ])
 
 def save_file(contents, filename):
-    # Pisahkan tipe konten dan string konten dari base64
     content_type, content_string = contents.split(',')
-    # Decode string base64
     decoded = base64.b64decode(content_string)
     
-    # Simpan file ke direktori tujuan
     file_path = os.path.join(UPLOAD_DIRECTORY, filename)
     with open(file_path, "wb") as f:
         f.write(decoded)
@@ -318,8 +315,8 @@ def toggle_upload_modal(open_clicks, close_clicks, contents, filename):
         save_file(contents, filename)
         return {**default_style, 'display': 'none'}
     if open_clicks > close_clicks:
-        return {**default_style, 'display': 'flex'}  # Tampilkan modal
-    return {**default_style, 'display': 'none'}  # Sembunyikan modal
+        return {**default_style, 'display': 'flex'}
+    return {**default_style, 'display': 'none'}
 
 @app.callback(
     Output({'type': 'sub-checkbox', 'name': ALL}, 'labelStyle'),
@@ -421,7 +418,6 @@ def update_plots(n_clicks, well_name, foil_date, months_end_date, slider_value, 
     scatter = 'scatter' in plot_type;
     line = 'line' in plot_type;
 
-
     foil_date = pd.to_datetime(foil_date)
     
     df = pd.read_excel(excel_file, sheet_name=well_name)
@@ -430,16 +426,27 @@ def update_plots(n_clicks, well_name, foil_date, months_end_date, slider_value, 
     start_date = df['DATE_STAMP'].iloc[slider_value[0]]
     end_date = df['DATE_STAMP'].iloc[slider_value[1]]
     end_dates = df['DATE_STAMP'].iloc[slider_value[1]]
+
+    mask = (df['DATE_STAMP'] >= start_date) & (df['DATE_STAMP'] <= end_date)
+    dfx = df.loc[mask].copy()
+
+    dfx['OIL_CUMULATIVE_PRODUCTION'] = 0.0
+    for i in range(1, len(dfx)):
+        days_diff = (dfx.loc[dfx.index[i], 'DATE_STAMP'] - dfx.loc[dfx.index[i - 1], 'DATE_STAMP']).days
+        oil_rate = dfx.loc[dfx.index[i - 1], 'CORR_OIL_RATE_STBD']
+        dfx.loc[dfx.index[i], 'OIL_CUMULATIVE_PRODUCTION'] = (
+            dfx.loc[dfx.index[i - 1], 'OIL_CUMULATIVE_PRODUCTION'] + days_diff * oil_rate
+        )
     
     best_b_oil, oil_exp_di, oil_har_di, oil_hyper_di, oil_exp_model, oil_har_model, oil_hyper_model, df_oil = ccf.process_data(excel_file, well_name, start_date, end_date, 'CORR_OIL_RATE_STBD', 'oil')
     
-    last_rate = df[df['CORR_OIL_RATE_STBD'] != 0]['CORR_OIL_RATE_STBD'].iloc[-1] + rate_intervention
+    last_rate = dfx[dfx['CORR_OIL_RATE_STBD'] != 0]['CORR_OIL_RATE_STBD'].iloc[-1] + rate_intervention
     qi = last_rate
 
     foil_date = foil_date.replace(day=1)
     end_date = foil_date + pd.DateOffset(months=months_end_date)
     date_range = pd.date_range(start=foil_date, end=end_date, freq='MS')
-    marker_y = df[df['DATE_STAMP'] == start_date]['CORR_OIL_RATE_STBD'].values[0]
+    marker_y = dfx[dfx['DATE_STAMP'] == start_date]['CORR_OIL_RATE_STBD'].values[0]
 
     forecast_df = pd.DataFrame({'DATE': date_range, 'TIME': range(len(date_range))})
     forecast_df['Forecast_Oil_Exponential'] = ccf.exponential_rate(last_rate, oil_exp_di, forecast_df['TIME'])
@@ -457,18 +464,18 @@ def update_plots(n_clicks, well_name, foil_date, months_end_date, slider_value, 
     if(b_value != 0):
         forecast_df['Forecast_Oil_Hyperbolic'] = ccf.hyperbolic_rate(last_rate, oil_hyper_di, b_value, forecast_df['TIME'])
         forecast_df['Oil_Cumulative_Hyper'] = ccf.cum_hyperbolic(forecast_df['Forecast_Oil_Hyperbolic'].iloc[0], oil_hyper_di, forecast_df['Forecast_Oil_Hyperbolic'], b_value)
-        forecast_df['Oil_Cumulative_Hyper'] += df['OIL_CUMULATIVE_PRODUCTION'].iloc[-1]
+        forecast_df['Oil_Cumulative_Hyper'] += dfx['OIL_CUMULATIVE_PRODUCTION'].iloc[-1]
         forecast_df['Oil_Cumulative_HyperTotal'] = forecast_df['Oil_Cumulative_Hyper']
 
         time_EUR_hyper = forecast_df[forecast_df['Forecast_Oil_Hyperbolic'] >= limit_value].iloc[-1]
         EUR_hyper = time_EUR_hyper['Oil_Cumulative_HyperTotal']
-        reserves_hyper = EUR_hyper - df['OIL_CUMULATIVE_PRODUCTION'].iloc[-1]
+        reserves_hyper = EUR_hyper - dfx['OIL_CUMULATIVE_PRODUCTION'].iloc[-1]
     forecast_df['Forecast_Oil_Harmonic'] = ccf.harmonic_rate(last_rate, oil_har_di, forecast_df['TIME'])
 
     forecast_df['Oil_Cumulative_Exp'] = ccf.cum_exponential(forecast_df['Forecast_Oil_Exponential'].iloc[0], oil_exp_di, forecast_df['Forecast_Oil_Exponential'])
-    forecast_df['Oil_Cumulative_Exp'] += df['OIL_CUMULATIVE_PRODUCTION'].iloc[-1]
+    forecast_df['Oil_Cumulative_Exp'] += dfx['OIL_CUMULATIVE_PRODUCTION'].iloc[-1]
     forecast_df['Oil_Cumulative_Har'] = ccf.cum_harmonic(forecast_df['Forecast_Oil_Harmonic'].iloc[0], oil_har_di, forecast_df['Forecast_Oil_Harmonic'])
-    forecast_df['Oil_Cumulative_Har'] += df['OIL_CUMULATIVE_PRODUCTION'].iloc[-1]
+    forecast_df['Oil_Cumulative_Har'] += dfx['OIL_CUMULATIVE_PRODUCTION'].iloc[-1]
 
     forecast_df['Oil_Cumulative_ExpTotal'] = forecast_df['Oil_Cumulative_Exp']
     forecast_df['Oil_Cumulative_EarTotal'] = forecast_df['Oil_Cumulative_Har']
@@ -477,39 +484,63 @@ def update_plots(n_clicks, well_name, foil_date, months_end_date, slider_value, 
     time_EUR_har = forecast_df[forecast_df['Forecast_Oil_Harmonic'] >= limit_value].iloc[-1]
     EUR_exp = time_EUR_exp['Oil_Cumulative_ExpTotal']
     EUR_har = time_EUR_har['Oil_Cumulative_EarTotal']
-    reserves_exp = EUR_exp - df['OIL_CUMULATIVE_PRODUCTION'].iloc[-1]
-    reserves_har = EUR_har - df['OIL_CUMULATIVE_PRODUCTION'].iloc[-1]
+    reserves_exp = EUR_exp - dfx['OIL_CUMULATIVE_PRODUCTION'].iloc[-1]
+    reserves_har = EUR_har - dfx['OIL_CUMULATIVE_PRODUCTION'].iloc[-1]
 
-    oil_fig = go.Figure()
-    if scatter: 
-        oil_fig.add_trace(go.Scatter(x=df['DATE_STAMP'], y=df['CORR_OIL_RATE_STBD'], mode='markers', name='Data', marker=dict(color='brown', size=5), showlegend=show_legend and scatter))
-    if line: 
-        oil_fig.add_trace(go.Scatter(x=df_oil['DATE_STAMP'], y=oil_exp_model, mode='lines', name='Exponential Model', line=dict(color='blue'), showlegend=show_legend and line))
-        oil_fig.add_trace(go.Scatter(x=df_oil['DATE_STAMP'], y=oil_hyper_model, mode='lines', name=f'Hyperbolic Model (best b = {best_b_oil})', line=dict(color='green'), showlegend=show_legend and line))
-        oil_fig.add_trace(go.Scatter(x=df_oil['DATE_STAMP'], y=oil_har_model, mode='lines', name='Harmonic Model', line=dict(color='orange'), showlegend=show_legend and line))
+    if scatter:
+        oil_fig = px.scatter(
+            df,
+            x='DATE_STAMP',
+            y='CORR_OIL_RATE_STBD',
+            title=f'Oil Rate Comparison of Decline Models Well {well_name}',
+            labels={'DATE_STAMP': 'Date', 'CORR_OIL_RATE_STBD': 'Oil Rate (bbl)'},
+            color_discrete_sequence=['brown'],
+            size_max=5,
+            hover_data={'DATE_STAMP': True, 'CORR_OIL_RATE_STBD': True}
+        )
+    else:
+        oil_fig = px.line(title=f'Oil Rate Comparison of Decline Models Well {well_name}')
+
+    oil_fig.update_layout(showlegend=show_legend)
     
-    val_reserves = 0
+    if line:
+        oil_fig.add_scatter(x=df_oil['DATE_STAMP'], y=oil_exp_model, mode='lines', name='Exponential Model', line=dict(color='blue'))
+        oil_fig.add_scatter(x=df_oil['DATE_STAMP'], y=oil_hyper_model, mode='lines', name=f'Hyperbolic Model (best b = {best_b_oil})', line=dict(color='green'))
+        oil_fig.add_scatter(x=df_oil['DATE_STAMP'], y=oil_har_model, mode='lines', name='Harmonic Model', line=dict(color='orange'))
+
     if b_value == 0.000:
         if line:
-            oil_fig.add_trace(go.Scatter(x=forecast_df['DATE'], y=forecast_df['Forecast_Oil_Exponential'], mode='lines', name=f'Exponential Forecast (b={b_value:.3f}, di={oil_exp_di:.2f}, qi={qi:.2f})', line=dict(color='LightBlue'), showlegend=show_legend and line))
+            oil_fig.add_scatter(x=forecast_df['DATE'], y=forecast_df['Forecast_Oil_Exponential'], mode='lines', name=f'Exponential Forecast (b={b_value:.3f}, di={oil_exp_di:.2f}, qi={qi:.2f})', line=dict(color='LightBlue'))
         crossed = forecast_df[forecast_df['Forecast_Oil_Exponential'] <= limit_value]
         reserves_output = "Reserves (Exponential): ", html.Span(f"{reserves_exp:.2f} stb", style={'fontWeight': 'bold'})
         val_reserves = reserves_exp
+        val_di = oil_exp_di
+        val_final_rate = forecast_df['Forecast_Oil_Exponential'].iloc[-1]
+        val_eur = EUR_exp
+        val_cum_prod = EUR_exp - reserves_exp
     elif b_value == 1.000:
         if line:
-            oil_fig.add_trace(go.Scatter(x=forecast_df['DATE'], y=forecast_df['Forecast_Oil_Harmonic'], mode='lines', name=f'Harmonic Forecast (b={b_value:.3f}, di={oil_har_di:.2f}, qi={qi:.2f})', line=dict(color='LightSalmon'), showlegend=show_legend and line))
+            oil_fig.add_scatter(x=forecast_df['DATE'], y=forecast_df['Forecast_Oil_Harmonic'], mode='lines', name=f'Harmonic Forecast (b={b_value:.3f}, di={oil_har_di:.2f}, qi={qi:.2f})', line=dict(color='LightSalmon'))
         crossed = forecast_df[forecast_df['Forecast_Oil_Harmonic'] <= limit_value]
         reserves_output = "Reserves (Harmonic): ", html.Span(f"{reserves_har:.2f} stb", style={'fontWeight': 'bold'})
         val_reserves = reserves_har
+        val_di = oil_har_di
+        val_final_rate = forecast_df['Forecast_Oil_Harmonic'].iloc[-1]
+        val_eur = EUR_har
+        val_cum_prod = EUR_har - reserves_har
     else:
-        if line :
-            oil_fig.add_trace(go.Scatter(x=forecast_df['DATE'], y=forecast_df['Forecast_Oil_Hyperbolic'], mode='lines', name=f'Hyperbolic Forecast (b={b_value:.3f}, di={oil_hyper_di:.2f}, qi={qi:.2f})', line=dict(color='LightGreen'), showlegend=show_legend and line))
+        if line:
+            oil_fig.add_scatter(x=forecast_df['DATE'], y=forecast_df['Forecast_Oil_Hyperbolic'], mode='lines', name=f'Hyperbolic Forecast (b={b_value:.3f}, di={oil_hyper_di:.2f}, qi={qi:.2f})', line=dict(color='LightGreen'))
         crossed = forecast_df[forecast_df['Forecast_Oil_Hyperbolic'] <= limit_value]
         reserves_output = "Reserves (Hyperbolic): ", html.Span(f"{reserves_hyper:.2f} stb", style={'fontWeight': 'bold'})
         val_reserves = reserves_hyper
+        val_di = oil_hyper_di
+        val_final_rate = forecast_df['Forecast_Oil_Hyperbolic'].iloc[-1]
+        val_eur = EUR_hyper
+        val_cum_prod = EUR_hyper - reserves_hyper
 
-    if line : 
-        oil_fig.add_trace(go.Scatter(x=[foil_date, end_date], y=[limit_value, limit_value], mode='lines', name=f'Rate Limit ({limit_value} bopd)', line=dict(color='red', dash='dash'), showlegend=show_legend and line))
+    if line:
+        oil_fig.add_scatter(x=[foil_date, end_date], y=[limit_value, limit_value], mode='lines', name=f'Rate Limit ({limit_value} bbl)', line=dict(color='red', dash='dash'))
 
     alert_message = []
     if not crossed.empty:
@@ -524,16 +555,36 @@ def update_plots(n_clicks, well_name, foil_date, months_end_date, slider_value, 
             )
         )
     
-    if scatter: 
-        oil_fig.add_trace(go.Scatter(x=[start_date], y=[marker_y], mode='markers', name='Initial Date', marker=dict(color='black', size=7), showlegend=show_legend and scatter))
+    if scatter:
+        oil_fig.add_scatter(x=[start_date], y=[marker_y], mode='markers', name='Initial Date', marker=dict(color='black', size=7))
 
     oil_fig.update_layout(
-        title=f'Oil Rate Comparison of Decline Models Well {well_name}',
-        xaxis_title='Date',
-        yaxis_title='Oil Rate (bopd)',
-        xaxis=dict(tickformat='%d-%m-%Y'),
+        xaxis=dict(title='Date', tickformat='%d-%m-%Y'),
+        yaxis=dict(title='Oil Rate (bbl)'),
         legend_title="Legend"
     )
+
+    # Hover Values
+    oil_fig.update_traces(
+        hovertemplate=(
+            "<b>Date</b>: %{x}<br>" +
+            "<b>Oil Rate</b>: %{y:.2f} bbl<br>" +
+            f"b: {b_value:.3f}<br>" +
+            f"Di: {val_di:.7f} M.n.<br>" +
+            f"qi: {qi:.3f} bbl<br>" +
+            f"ti: {foil_date.strftime('%m/%d/%Y')}<br>" +
+            f"te: {end_date.strftime('%m/%d/%Y')}<br>" +
+            f"Final Rate: {val_final_rate:.4f} bbl<br>" +
+            f"Cum. Prod.: {val_cum_prod:.3f} bbl<br>" +
+            f"Cum. Date: {end_dates.strftime('%m/%d/%Y')}<br>" +
+            f"Reserves: {val_reserves:.2f} stb<br>" +
+            f"Reserves Date: {end_date.strftime('%m/%d/%Y')}<br>" +
+            f"EUR: {val_eur:.2f} <br>" +
+            "<extra></extra>"
+        )
+    )
+
+    # oil_fig.update_layout(hovermode='x')
 
     new_row = {
         "Well Name": well_name,
