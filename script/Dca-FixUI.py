@@ -1,5 +1,5 @@
 import dash
-import os, webbrowser
+import os, webbrowser, base64
 import dash_bootstrap_components as dbc
 import pandas as pd
 import numpy as np
@@ -11,7 +11,7 @@ from datetime import datetime
 
 app = dash.Dash(__name__, external_stylesheets=[dbc.themes.BOOTSTRAP])
 app.title = 'DCA'
-
+UPLOAD_DIRECTORY = os.path.join(os.path.dirname(__file__), '../Data')
 excel_file = './Data/data_resampling_cumProd.xlsx'
 xls = pd.ExcelFile(excel_file)
 sheet_names = xls.sheet_names
@@ -21,11 +21,15 @@ for name in sheet_names:
     parents = name.split("-")
     main, sub, detail = parents[0], parents[1], parents[2]
 
-    if main not in Objects:
-        Objects[main] = {}
-    if "Platform "+sub not in Objects[main]:
-        Objects[main]["Platform "+sub] = []
-    Objects[main]["Platform "+sub].append(name)
+    field_key = f"{main}ekapai Field"
+    platform_key = f"Platform {sub}"
+
+    if field_key not in Objects:
+        Objects[field_key] = {}
+    if platform_key not in Objects[field_key]:
+        Objects[field_key][platform_key] = []
+
+    Objects[field_key][platform_key].append(name)
 
 def create_nested_checkboxes(structure):
     elements = []
@@ -72,7 +76,37 @@ table_data = pd.DataFrame(columns=["Well Name", "Start Date", "End Date", "Reser
 selected_b_value = 0.5
 
 app.layout = dbc.Container([
-    html.Div(style={'display': 'flex', 'gap': 28, 'paddingTop': '50px'}, children=[
+    html.Button(children=[
+        html.Img(src="assets/upload.png", style={'width': '18px', 'height': '15.65px'}),
+        html.H1("Upload File", style={'fontSize': '16px', 'fontWeight': '500', 'color': '#3F849B'})
+    ], id="open-upload-button", n_clicks=0, style={'marginTop': '50px', 'display': 'flex', 'gap': '8px', 'justifyItems': 'center', 'border': 'none', 'backgroundColor': 'transparent'}),
+    html.Div(
+        id="upload-modal",
+        children=[
+            html.Div([
+                dcc.Upload(
+                    id="file-upload",
+                    children=[
+                        html.Img(src="assets/uploadv2.png"),
+                        html.H6("Browse file (.csv) to upload")
+                    ],
+                    style={
+                        'width': '779px', 'height': '286px', 'lineHeight': '60px', 'display': 'flex', 'flexDirection': 'column',
+                        'borderWidth': '1px', 'borderStyle': 'dashed', 'borderColor': '#B6B2B2',
+                        'borderRadius': '15px', 'textAlign': 'center', 'alignItems': 'center', 'justifyItems': 'center', 'justifyContent': 'center'
+                    },
+                    multiple=False
+                ),
+                html.Button("Close", id="close-upload-button", n_clicks=0, style={'width': '100%', 'height': '63px', 'backgroundColor': '#3F849B', 'display': 'flex', 'alignItems': 'center', 'justifyContent': 'center', 'color': '#F9F9F9', 'fontSize': '16px', 'fontWeight': '500', 'border': 'none', 'borderRadius': '12px'})
+            ], style={'padding': '44px', 'backgroundColor': 'white', 'borderRadius': '5px', 'border': '1px solid #3F849B', 'display': 'flex', 'flexDirection': 'column', 'gap': '12px'}),
+        ],
+        style={
+            'display': 'none',
+            'position': 'fixed', 'top': '0', 'left': '0', 'width': '100%', 'height': '100%',
+            'backgroundColor': 'rgba(0, 0, 0, 0.5)', 'alignItems': 'center', 'justifyContent': 'center'
+        }
+    ),
+    html.Div(style={'display': 'flex', 'gap': 28, 'paddingTop': '17px'}, children=[
         html.Div(style={'display': 'flex', 'flexDirection': 'column', 'gap': '10px'}, children=[
             html.Div(className='feature-container', style={'border': '1px solid #3F849B', 'padding': '0', 'borderRadius': '16px', 'width': '174px', 'height': '123px'}, children=[
                 html.H1('Plot Type', className='Feature-title', style={'color': 'white', 'fontWeight': '700', 'fontSize': '16px', 'padding': '8px 17px', 'backgroundColor': '#3F849B', 'borderRadius': '10px'}),
@@ -255,17 +289,51 @@ app.layout = dbc.Container([
     ])
 ])
 
+def save_file(contents, filename):
+    # Pisahkan tipe konten dan string konten dari base64
+    content_type, content_string = contents.split(',')
+    # Decode string base64
+    decoded = base64.b64decode(content_string)
+    
+    # Simpan file ke direktori tujuan
+    file_path = os.path.join(UPLOAD_DIRECTORY, filename)
+    with open(file_path, "wb") as f:
+        f.write(decoded)
+
+@app.callback(
+    Output("upload-modal", "style"),
+    Input("open-upload-button", "n_clicks"), 
+    Input("close-upload-button", "n_clicks"),
+    Input('file-upload', 'contents'),
+    State('file-upload', 'filename')
+)
+def toggle_upload_modal(open_clicks, close_clicks, contents, filename):
+    default_style = {
+        'lineHeight': '60px',
+        'borderWidth': '1px', 'borderStyle': 'dashed',
+        'borderRadius': '5px', 'textAlign': 'center', 'zIndex': 999, 'backgroundColor': "rgba(0,0,0,0,0.5)",
+        'position': 'absolute', 'top': 0, 'bottom': 0, 'left': 0, 'right': 0, 'alignItems': 'center', 'justifyContent': 'center'
+    }
+    if contents is not None:
+        save_file(contents, filename)
+        return {**default_style, 'display': 'none'}
+    if open_clicks > close_clicks:
+        return {**default_style, 'display': 'flex'}  # Tampilkan modal
+    return {**default_style, 'display': 'none'}  # Sembunyikan modal
+
 @app.callback(
     Output({'type': 'sub-checkbox', 'name': ALL}, 'labelStyle'),
+    Output({'type': 'sub-checkbox', 'name': ALL}, 'value'),
     Input({'type': 'main-checkbox', 'name': ALL}, 'value'),
-    State({'type': 'sub-checkbox', 'name': ALL}, 'labelStyle')
+    State({'type': 'sub-checkbox', 'name': ALL}, 'labelStyle'),
+    State({'type': 'sub-checkbox', 'name': ALL}, 'value')
 )
-def update_sub_checkboxes(main_checked, sub_label_style):
+def update_sub_checkboxes(main_checked, sub_label_style, value):
     defaultStyle = {'display': 'flex', 'marginBottom': '19px', 'gap': '15px', 'align-items': 'center', 'fontWeight': '400', 'fontSize': '14px', 'color': '#616161'}
     if main_checked[0] != [] :
-        return [defaultStyle for _ in sub_label_style]
+        return [defaultStyle for _ in sub_label_style], value
     else:
-        return [{'display': 'none'} for _ in sub_label_style]
+        return [{'display': 'none'} for _ in sub_label_style], [[] for _ in value]
 
 @app.callback(
     Output({'type': 'detail-checkbox', 'name': ALL}, 'labelStyle'),
