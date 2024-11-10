@@ -33,10 +33,10 @@ def create_nested_checkboxes(structure):
     for main, subs in structure.items():
         main_checkbox = html.Div([
             dcc.Checklist(
-                options=[{'label': main, 'value': main}],
+                options=[{'label': 'Bekapai Field', 'value': main}],
                 id={'type': 'main-checkbox', 'name': f'checkbox-{main}'},
                 inline=True,
-                labelStyle={'display': 'flex', 'marginBottom': '19px', 'gap': '15px', 'align-items': 'center', 'fontWeight': '400', 'fontSize': '14px', 'color': '#616161'},
+                labelStyle={'display': 'flex', 'marginBottom': '19px', 'gap': '15px', 'alignItems': 'center', 'fontWeight': '400', 'fontSize': '14px', 'color': '#616161'},
                 inputStyle={'transform': 'scale(1.5)', 'borderRadius': '6px'}
             )
         ], style={'marginLeft': '8px'})
@@ -48,7 +48,7 @@ def create_nested_checkboxes(structure):
                 id={'type': 'sub-checkbox', 'name': f'checkbox-{main}-{sub}'},
                 inline=True,
                 labelStyle={'display': 'flex', 'marginBottom': '19px', 'gap': '15px', 'alignItems': 'center', 'fontWeight': '400', 'fontSize': '14px', 'color': '#616161'},
-                inputStyle={'transform': 'scale(1.5)', 'border-radius': '6px'}
+                inputStyle={'transform': 'scale(1.5)', 'borderRadius': '6px'}
             )
 
 
@@ -82,8 +82,8 @@ app.layout = dbc.Container([
                             {'label': 'Line', 'value': 'line'},
                         ],
                         value=['scatter', 'line'], 
-                        labelStyle={'display': 'flex', 'margin-bottom': '9.5px', 'gap': '15px', 'align-items': 'center', 'fontWeight': '400', 'fontSize': '14px', 'color': '#616161'},
-                        inputStyle={'transform': 'scale(1.5)', 'border-radius': '6px'}
+                        labelStyle={'display': 'flex', 'marginBottom': '9.5px', 'gap': '15px', 'alignItems': 'center', 'fontWeight': '400', 'fontSize': '14px', 'color': '#616161'},
+                        inputStyle={'transform': 'scale(1.5)', 'borderRadius': '6px'}
                     ),
                 ])
             ]),
@@ -96,8 +96,8 @@ app.layout = dbc.Container([
                             {'label': 'Enable', 'value': 'on'},
                         ],
                         value=['on'], 
-                        labelStyle={'display': 'flex', 'margin-bottom': '9.5px', 'gap': '15px', 'align-items': 'center', 'fontWeight': '400', 'fontSize': '14px', 'color': '#616161'},
-                        inputStyle={'transform': 'scale(1.5)', 'border-radius': '6px'}
+                        labelStyle={'display': 'flex', 'marginBottom': '9.5px', 'gap': '15px', 'alignItems': 'center', 'fontWeight': '400', 'fontSize': '14px', 'color': '#616161'},
+                        inputStyle={'transform': 'scale(1.5)', 'borderRadius': '6px'}
                     ),
                 ])
             ]),
@@ -112,8 +112,8 @@ app.layout = dbc.Container([
                             {'label': 'Harmonic', 'value': 1},
                         ],
                         value=selected_b_value, 
-                        labelStyle={'display': 'flex', 'margin-bottom': '9.5px', 'gap': '15px', 'align-items': 'center', 'fontWeight': '400', 'fontSize': '14px', 'color': '#616161'},
-                        inputStyle={'transform': 'scale(1.5)', 'border-radius': '6px'}
+                        labelStyle={'display': 'flex', 'marginBottom': '9.5px', 'gap': '15px', 'alignItems': 'center', 'fontWeight': '400', 'fontSize': '14px', 'color': '#616161'},
+                        inputStyle={'transform': 'scale(1.5)', 'borderRadius': '6px'}
                     ),
                 ])
             ]),
@@ -188,7 +188,7 @@ app.layout = dbc.Container([
                 ]),
                 dbc.Row([
                 dbc.Col(html.Div(id='reserves-output'), width=12),
-                ], style={'margin-bottom': '10px'}),
+                ], style={'marginBottom': '10px'}),
                 dbc.Row([
                     dbc.Col([
                         html.Label('Select Date Range:'),
@@ -222,13 +222,13 @@ app.layout = dbc.Container([
                     data=table_data.to_dict("records"),
                     editable=True,
                     row_deletable=True,
-                    style_table={'margin-top': '20px'}
+                    style_table={'marginTop': '20px'}
                 ),
                 
                 html.Div([
                     html.Button("Update data", id="update-button", n_clicks=0),
                     html.Button("Download data table", id="download-button", n_clicks=0)
-                ], style={"display": "flex", "gap": "10px", "margin-top": "10px"}),
+                ], style={"display": "flex", "gap": "10px", "marginTop": "10px"}),
 
                 dcc.Download(id="download-csv")
             ]),
