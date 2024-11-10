@@ -6,7 +6,7 @@ import numpy as np
 import plotly.graph_objects as go
 import curve_cum_function as ccf
 from dash import dcc, html, dash_table, callback_context
-from dash.dependencies import Input, Output, State
+from dash.dependencies import Input, Output, State, ALL
 from datetime import datetime
 
 app = dash.Dash(__name__, external_stylesheets=[dbc.themes.BOOTSTRAP])
@@ -15,6 +15,56 @@ app.title = 'DCA'
 excel_file = './Data/data_resampling_cumProd.xlsx'
 xls = pd.ExcelFile(excel_file)
 sheet_names = xls.sheet_names
+
+Objects = {}
+for name in sheet_names:
+    parents = name.split("-")
+    main, sub, detail = parents[0], parents[1], parents[2]
+
+    if main not in Objects:
+        Objects[main] = {}
+    if "Platform "+sub not in Objects[main]:
+        Objects[main]["Platform "+sub] = []
+    Objects[main]["Platform "+sub].append(name)
+
+def create_nested_checkboxes(structure):
+    elements = []
+    
+    for main, subs in structure.items():
+        main_checkbox = html.Div([
+            dcc.Checklist(
+                options=[{'label': main, 'value': main}],
+                id={'type': 'main-checkbox', 'name': f'checkbox-{main}'},
+                inline=True,
+                labelStyle={'display': 'flex', 'marginBottom': '19px', 'gap': '15px', 'align-items': 'center', 'fontWeight': '400', 'fontSize': '14px', 'color': '#616161'},
+                inputStyle={'transform': 'scale(1.5)', 'borderRadius': '6px'}
+            )
+        ], style={'marginLeft': '8px'})
+        
+        sub_elements = []
+        for sub, details in subs.items():
+            sub_checkbox = dcc.Checklist(
+                options=[{'label': sub, 'value': sub}],
+                id={'type': 'sub-checkbox', 'name': f'checkbox-{main}-{sub}'},
+                inline=True,
+                labelStyle={'display': 'flex', 'marginBottom': '19px', 'gap': '15px', 'alignItems': 'center', 'fontWeight': '400', 'fontSize': '14px', 'color': '#616161'},
+                inputStyle={'transform': 'scale(1.5)', 'border-radius': '6px'}
+            )
+
+
+            detail_elements = dcc.Checklist(
+                options=[{'label': detail, 'value': detail} for detail in details],
+                id={'type':'detail-checkbox', 'name': f'checkbox-{main}-{sub}-details'},
+                value=['B-L-18'] if 'B-L-18' in details else [],
+                inline=True,
+                labelStyle={'display': 'flex', 'marginBottom': '19px', 'gap': '15px', 'alignItems': 'center', 'fontWeight': '400', 'fontSize': '14px', 'color': '#616161'},
+                inputStyle={'transform': 'scale(1.5)', 'borderRadius': '6px'}
+            )
+            
+            sub_elements.append(html.Div([sub_checkbox, html.Div(detail_elements, style={'marginLeft': '32px'})]))
+        
+        elements.append(html.Div([main_checkbox, html.Div(sub_elements, style={'marginLeft': '32px'})]))
+    return elements
 
 table_data = pd.DataFrame(columns=["Well Name", "Start Date", "End Date", "Reserves", "Cut Off Date"])
 selected_b_value = 0.5
@@ -112,88 +162,120 @@ app.layout = dbc.Container([
                 ])
             ]), 
         ]),
-        html.Div(style={'border': '1px solid grey', 'padding': '21px', 'borderRadius': '30px'}, children=[
-            dbc.Row([
-                dbc.Col([
-                    html.Label('Adjust b Value:'),
-                    dcc.Slider(
-                        id='b-value-slider',
-                        min=0.0,
-                        max=1.0,
-                        step=0.001,
-                        value=0.5,
-                        marks={0: '0.000', 0.5: '0.500', 1: '1.000'},
-                        tooltip={"placement": "bottom", "always_visible": True}
-                    )
-                ], width=4),
-            ]),
-            dbc.Row([
-                dbc.Col(dcc.Graph(id='oil-plot'), width=12),
-            ]),
-            dbc.Row([
-            dbc.Col(html.Div(id='reserves-output'), width=12),
-            ], style={'margin-bottom': '10px'}),
-            dbc.Row([
-                dbc.Col([
-                    html.Label('Select Date Range:'),
-                    dcc.RangeSlider(
-                        id='date-slider',
-                        min=0,
-                        max=1000,
-                        step=1,
-                        value=[0, 1000],
-                        marks={},
-                        tooltip={"placement": "bottom", "always_visible": True}
-                    )
-                ], width=12),
-            ]),
-            dbc.Row([
-                dbc.Col([
-                    html.Div(id='alert', children=[])
-                ], width=12),
-            ]),
-            dash_table.DataTable(
-                id="data-table",
-                columns=[
-                    {"name": "Well Name", "id": "Well Name"},
-                    {"name": "Start Date", "id": "Start Date"},
-                    {"name": "End Date", "id": "End Date"},
-                    {"name": "Start Forecast Date", "id": "Start Forecast Date"},
-                    {"name": "Reserves (stb)", "id": "Reserves (stb)"},
-                    {"name": "Rate Intervention (bopd)", "id": "Rate Intervention (bopd)"},
-                    {"name": "Cut Off Date", "id": "Cut Off Date"}
-                ],
-                data=table_data.to_dict("records"),
-                editable=True,
-                row_deletable=True,
-                style_table={'margin-top': '20px'}
+        html.Div(children=[
+            dcc.Tabs(id='tab-container',
+                value='B-L-18',
+                children=[],
+                content_style={'textAlign':'center'}
             ),
-            
-            html.Div([
-                html.Button("Update data", id="update-button", n_clicks=0),
-                html.Button("Download data table", id="download-button", n_clicks=0)
-            ], style={"display": "flex", "gap": "10px", "margin-top": "10px"}),
+            html.Div(style={'border': '1px solid grey', 'padding': '21px', 'borderBottomLeftRadius': '30px', 'borderBottomRightRadius': '30px', 'borderTopRightRadius': '30px'}, children=[
+                dbc.Row([
+                    dbc.Col([
+                        html.Label('Adjust b Value:'),
+                        dcc.Slider(
+                            id='b-value-slider',
+                            min=0.0,
+                            max=1.0,
+                            step=0.001,
+                            value=0.5,
+                            marks={0: '0.000', 0.5: '0.500', 1: '1.000'},
+                            tooltip={"placement": "bottom", "always_visible": True}
+                        )
+                    ], width=4),
+                ]),
+                dbc.Row([
+                    dbc.Col(dcc.Graph(id='oil-plot'), width=12),
+                ]),
+                dbc.Row([
+                dbc.Col(html.Div(id='reserves-output'), width=12),
+                ], style={'margin-bottom': '10px'}),
+                dbc.Row([
+                    dbc.Col([
+                        html.Label('Select Date Range:'),
+                        dcc.RangeSlider(
+                            id='date-slider',
+                            min=0,
+                            max=1000,
+                            step=1,
+                            value=[0, 1000],
+                            marks={},
+                            tooltip={"placement": "bottom", "always_visible": True}
+                        )
+                    ], width=12),
+                ]),
+                dbc.Row([
+                    dbc.Col([
+                        html.Div(id='alert', children=[])
+                    ], width=12),
+                ]),
+                dash_table.DataTable(
+                    id="data-table",
+                    columns=[
+                        {"name": "Well Name", "id": "Well Name"},
+                        {"name": "Start Date", "id": "Start Date"},
+                        {"name": "End Date", "id": "End Date"},
+                        {"name": "Start Forecast Date", "id": "Start Forecast Date"},
+                        {"name": "Reserves (stb)", "id": "Reserves (stb)"},
+                        {"name": "Rate Intervention (bopd)", "id": "Rate Intervention (bopd)"},
+                        {"name": "Cut Off Date", "id": "Cut Off Date"}
+                    ],
+                    data=table_data.to_dict("records"),
+                    editable=True,
+                    row_deletable=True,
+                    style_table={'margin-top': '20px'}
+                ),
+                
+                html.Div([
+                    html.Button("Update data", id="update-button", n_clicks=0),
+                    html.Button("Download data table", id="download-button", n_clicks=0)
+                ], style={"display": "flex", "gap": "10px", "margin-top": "10px"}),
 
-            dcc.Download(id="download-csv")
+                dcc.Download(id="download-csv")
+            ]),
         ]),
         html.Div(style={'display': 'flex', 'flexDirection': 'column', 'gap': '10px'}, children=[
             html.Div(className='feature-container', style={'border': '1px solid #3F849B', 'padding': '0', 'borderRadius': '16px', 'width': '229px', 'minHeight': '40px'}, children=[
                 html.H1('Objects', className='Feature-title', style={'color': 'white', 'fontWeight': '700', 'fontSize': '16px', 'padding': '8px 17px', 'backgroundColor': '#3F849B', 'borderRadius': '10px'}),
                 html.Div(style={'padding': '10px', 'display': 'flex', 'flexDirection': 'column', 'gap': '10px'}, children=[
-                    html.Div(style={'fontWeight': '400', 'fontSize': '14px', 'color': '#616161'}, children=[
+                    html.Div(style={'fontWeight': '400', 'fontSize': '14px', 'color': '#616161', 'display': 'none'}, children=[
                         html.Label('Select Well:', style={'fontWeight': '400', 'fontSize': '14px', 'color': '#616161'}),
                         dcc.Dropdown(
                             id='well-name', 
                             options=[{'label': name, 'value': name} for name in sheet_names], 
                             value='B-L-18',
-                            clearable=False
+                            clearable=False,
                         )
                     ]),
+                    html.Div(children=create_nested_checkboxes(Objects))
                 ])
             ]), 
         ]),
     ])
 ])
+
+@app.callback(
+    Output('well-name', 'value'),
+    Input('tab-container', 'value'),
+)
+def showData(tab_container):
+    return tab_container
+
+@app.callback(
+    Output('tab-container', 'children'),
+    Input({'type': 'detail-checkbox', 'name': ALL}, 'value'),
+)
+def update_tabs(selected_items):
+    tabs = []
+    items = [*selected_items[0], *selected_items[1]]
+    for value in items:
+        tab_button = dcc.Tab(
+            label=value,
+            value=value,
+            style={'border': '1px solid #909090',  'backgroundColor': 'white', 'width': '141px',  'height': '39px',  'borderTopLeftRadius': '10px',  'borderTopRightRadius': '10px', 'display': 'flex', 'alignItems': 'center', 'justifyItems': 'center', 'display': 'flex', 'alignItems': 'center', 'justifyItems': 'center'},                   
+            selected_style={ 'border': '1px solid #909090',  'backgroundColor': '#BFF2DA', 'width': '141px',  'height': '39px',  'borderTopLeftRadius': '10px',  'borderTopRightRadius': '10px', 'display': 'flex', 'alignItems': 'center', 'justifyItems': 'center', 'textAlign':'center'},
+        )               
+        tabs.insert(0, tab_button)
+    return tabs
 
 @app.callback(
     Output('date-slider', 'min'),
