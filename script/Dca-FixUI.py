@@ -584,8 +584,6 @@ def update_plots(n_clicks, well_name, foil_date, months_end_date, slider_value, 
         )
     )
 
-    # oil_fig.update_layout(hovermode='x')
-
     new_row = {
         "Well Name": well_name,
         "Start Date": start_date.strftime('%d-%m-%Y'),
