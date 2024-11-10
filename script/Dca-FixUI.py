@@ -34,6 +34,7 @@ def create_nested_checkboxes(structure):
         main_checkbox = html.Div([
             dcc.Checklist(
                 options=[{'label': main, 'value': main}],
+                value=[main],
                 id={'type': 'main-checkbox', 'name': f'checkbox-{main}'},
                 inline=True,
                 labelStyle={'display': 'flex', 'marginBottom': '19px', 'gap': '15px', 'align-items': 'center', 'fontWeight': '400', 'fontSize': '14px', 'color': '#616161'},
@@ -46,6 +47,7 @@ def create_nested_checkboxes(structure):
             sub_checkbox = dcc.Checklist(
                 options=[{'label': sub, 'value': sub}],
                 id={'type': 'sub-checkbox', 'name': f'checkbox-{main}-{sub}'},
+                value=[sub] if 'Platform L' == sub else [],
                 inline=True,
                 labelStyle={'display': 'flex', 'marginBottom': '19px', 'gap': '15px', 'alignItems': 'center', 'fontWeight': '400', 'fontSize': '14px', 'color': '#616161'},
                 inputStyle={'transform': 'scale(1.5)', 'border-radius': '6px'}
@@ -70,7 +72,7 @@ table_data = pd.DataFrame(columns=["Well Name", "Start Date", "End Date", "Reser
 selected_b_value = 0.5
 
 app.layout = dbc.Container([
-    html.Div(style={'display': 'flex', 'gap': 28, 'padding': '50px'}, children=[
+    html.Div(style={'display': 'flex', 'gap': 28, 'paddingTop': '50px'}, children=[
         html.Div(style={'display': 'flex', 'flexDirection': 'column', 'gap': '10px'}, children=[
             html.Div(className='feature-container', style={'border': '1px solid #3F849B', 'padding': '0', 'borderRadius': '16px', 'width': '174px', 'height': '123px'}, children=[
                 html.H1('Plot Type', className='Feature-title', style={'color': 'white', 'fontWeight': '700', 'fontSize': '16px', 'padding': '8px 17px', 'backgroundColor': '#3F849B', 'borderRadius': '10px'}),
@@ -252,6 +254,32 @@ app.layout = dbc.Container([
         ]),
     ])
 ])
+
+@app.callback(
+    Output({'type': 'sub-checkbox', 'name': ALL}, 'labelStyle'),
+    Input({'type': 'main-checkbox', 'name': ALL}, 'value'),
+    State({'type': 'sub-checkbox', 'name': ALL}, 'labelStyle')
+)
+def update_sub_checkboxes(main_checked, sub_label_style):
+    defaultStyle = {'display': 'flex', 'marginBottom': '19px', 'gap': '15px', 'align-items': 'center', 'fontWeight': '400', 'fontSize': '14px', 'color': '#616161'}
+    if main_checked[0] != [] :
+        return [defaultStyle for _ in sub_label_style]
+    else:
+        return [{'display': 'none'} for _ in sub_label_style]
+
+@app.callback(
+    Output({'type': 'detail-checkbox', 'name': ALL}, 'labelStyle'),
+    Input({'type': 'sub-checkbox', 'name': ALL}, 'value')
+)
+def update_detail_checkboxes(sub_checked):
+    default_style = {'display': 'flex', 'marginBottom': '19px', 'gap': '15px', 'align-items': 'center', 'fontWeight': '400', 'fontSize': '14px', 'color': '#616161'}
+    style = []
+    for items in sub_checked:
+        if items != []:
+            style.append(default_style)
+        else: 
+            style.append({'display': 'none'})
+    return style
 
 @app.callback(
     Output('well-name', 'value'),
