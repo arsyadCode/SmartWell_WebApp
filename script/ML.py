@@ -442,4 +442,4 @@ def display_file_preview(n_clicks_list, file_ids):
 if __name__ == '__main__':
     if os.environ.get("WERKZEUG_RUN_MAIN") == "true":
         webbrowser.open_new("http://127.0.0.1:8050/")
-    app.run_server(debug=True, dev_tools_ui=True)
+    app.run_server(debug=True, dev_tools_ui=False)
