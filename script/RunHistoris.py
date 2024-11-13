@@ -26,17 +26,17 @@ scale_options = ['Linear', 'Log']
 scale_dropdown = Select(title="Y-Axis Scale:", value=scale_options[0], options=scale_options)
 
 # Define the header with logos and title
-title = "Smart Well Monitoring - Universitas Pertamina"
-header = pn.Row(
-    pn.pane.PNG(logo, height=80, sizing_mode='stretch_width'),
-    pn.layout.Spacer(),
-    pn.pane.Str(f'<b style="color:#000000; font-family: Roboto">{title}</b>', styles={'font-size': '18pt', 'margin': 'auto', 'text-align': 'center'}, sizing_mode='stretch_width'),
-    pn.layout.Spacer(),
-    pn.pane.PNG(phm_logo, height=115, sizing_mode='stretch_width', link_url='https://phi.pertamina.com/'),
-    styles=dict(background="#ffffff"),
-    align="center",
-    sizing_mode="stretch_width",
-)
+# title = "Smart Well Monitoring - Universitas Pertamina"
+# header = pn.Row(
+#     pn.pane.PNG(logo, height=80, sizing_mode='stretch_width'),
+#     pn.layout.Spacer(),
+#     pn.pane.Str(f'<b style="color:#000000; font-family: Roboto">{title}</b>', styles={'font-size': '18pt', 'margin': 'auto', 'text-align': 'center'}, sizing_mode='stretch_width'),
+#     pn.layout.Spacer(),
+#     pn.pane.PNG(phm_logo, height=115, sizing_mode='stretch_width', link_url='https://phi.pertamina.com/'),
+#     styles=dict(background="#ffffff"),
+#     align="center",
+#     sizing_mode="stretch_width",
+# )
 
 # Create a single figure with multiple lines and secondary y-axis
 def create_combined_figure(selected_data, y_axis_type):
@@ -95,7 +95,7 @@ def update_figures(attr, old, new):
     )
     
     # Update the panel
-    dashboard[:] = [header, layout]
+    dashboard[:] = [layout]
 
 # Create the initial layout
 initial_data = df.loc[df['Universal'] == dropdown.value]
@@ -107,7 +107,7 @@ layout = column(
 )
 
 # Create the dashboard
-dashboard = pn.Column(header, layout, sizing_mode="stretch_width")
+dashboard = pn.Column(layout, sizing_mode="stretch_width")
 
 # Register the callback function with the dropdown widgets
 dropdown.on_change('value', update_figures)
@@ -115,4 +115,4 @@ scale_dropdown.on_change('value', update_figures)
 
 # Serve the Panel dashboard on localhost
 if __name__ == '__main__':
-    pn.serve(dashboard.servable(), title=title, favicon=favicon)
+    pn.serve(dashboard.servable(), title="Smart Well Monitoring - Universitas Pertamina", favicon=favicon)
