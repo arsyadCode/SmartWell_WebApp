@@ -1,7 +1,7 @@
 import pandas as pd
 import panel as pn
 from bokeh.plotting import figure
-from bokeh.models import Select, CheckboxGroup
+from bokeh.models import Select, CheckboxGroup, HoverTool
 from bokeh.layouts import column, row
 from bokeh.models.formatters import DatetimeTickFormatter
 
@@ -53,6 +53,17 @@ def create_figure(width, height, x, y, x2, y2, ylabel, color):
     fig.xaxis.axis_label = 'Year'
     fig.yaxis.axis_label = ylabel
     fig.xaxis.formatter = DatetimeTickFormatter(years="%Y")
+
+    hover = HoverTool()
+    hover.tooltips = [
+        ("Date", "@x{%F}"),
+        (ylabel, "@y"),
+    ]
+    hover.formatters = {
+        '@x': 'datetime',
+    }
+    fig.add_tools(hover)
+    
     return fig
 
 # Callback function to update figures based on dropdown selection and checkbox status
@@ -94,10 +105,10 @@ def update_figures(attr, old, new):
     dashboard[:] = [header, column(*layout_components)]
 
 # Initial layout
-layout = row(dropdown, figures_checkbox)
+layout = row(dropdown, figures_checkbox, margin=(0, 0, 0, 45))
 
 # Create the Panel dashboard
-dashboard = pn.Column(header, layout, sizing_mode="stretch_width")
+dashboard = pn.Column(header, layout, sizing_mode="stretch_width", margin=(0, 0, 0, 45))
 
 # Register callback functions
 dropdown.on_change('value', update_figures)
