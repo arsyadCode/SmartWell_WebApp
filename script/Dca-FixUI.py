@@ -12,7 +12,7 @@ from datetime import datetime
 app = dash.Dash(__name__, external_stylesheets=[dbc.themes.BOOTSTRAP])
 app.title = 'DCA'
 UPLOAD_DIRECTORY = os.path.join(os.path.dirname(__file__), '../Data')
-excel_file = './Data/data_resampling_cumProd.xlsx'
+excel_file = './Data/data_resampling_dailyX.xlsx'
 xls = pd.ExcelFile(excel_file)
 sheet_names = xls.sheet_names
 
@@ -72,7 +72,7 @@ def create_nested_checkboxes(structure):
         elements.append(html.Div([main_checkbox, html.Div(sub_elements, style={'marginLeft': '32px'})]))
     return elements
 
-table_data = pd.DataFrame(columns=["Well Name", "Start Date", "End Date", "Reserves", "Cut Off Date"])
+table_data = pd.DataFrame(columns=["Well Name", "Start Date", "End Date", "b", "Reserves", "Cut Off Date"])
 selected_b_value = 0.5
 
 app.layout = dbc.Container([
@@ -231,9 +231,9 @@ app.layout = dbc.Container([
                         dcc.RangeSlider(
                             id='date-slider',
                             min=0,
-                            max=1000,
+                            max=15000,
                             step=1,
-                            value=[0, 1000],
+                            value=[0, 15000],
                             marks={},
                             tooltip={"placement": "bottom", "always_visible": True}
                         )
@@ -250,8 +250,9 @@ app.layout = dbc.Container([
                         {"name": "Well Name", "id": "Well Name"},
                         {"name": "Start Date", "id": "Start Date"},
                         {"name": "End Date", "id": "End Date"},
+                        {"name": "b", "id": "b"},
                         {"name": "Start Forecast Date", "id": "Start Forecast Date"},
-                        {"name": "Reserves (stb)", "id": "Reserves (stb)"},
+                        {"name": "Reserves (bbl)", "id": "Reserves (bbl)"},
                         {"name": "Rate Intervention (bopd)", "id": "Rate Intervention (bopd)"},
                         {"name": "Cut Off Date", "id": "Cut Off Date"}
                     ],
@@ -431,11 +432,19 @@ def update_plots(n_clicks, well_name, foil_date, months_end_date, slider_value, 
     dfx = df.loc[mask].copy()
 
     dfx['OIL_CUMULATIVE_PRODUCTION'] = 0.0
+    # Calculate cumulative production on a monthly basis
+    # for i in range(1, len(dfx)):
+    #     days_diff = (dfx.loc[dfx.index[i], 'DATE_STAMP'] - dfx.loc[dfx.index[i - 1], 'DATE_STAMP']).days
+    #     oil_rate = dfx.loc[dfx.index[i - 1], 'CORR_OIL_RATE_STBD']
+    #     dfx.loc[dfx.index[i], 'OIL_CUMULATIVE_PRODUCTION'] = (
+    #         dfx.loc[dfx.index[i - 1], 'OIL_CUMULATIVE_PRODUCTION'] + days_diff * oil_rate
+    #     )
+
+    # Calculate cumulative production on a daily basis
     for i in range(1, len(dfx)):
-        days_diff = (dfx.loc[dfx.index[i], 'DATE_STAMP'] - dfx.loc[dfx.index[i - 1], 'DATE_STAMP']).days
         oil_rate = dfx.loc[dfx.index[i - 1], 'CORR_OIL_RATE_STBD']
         dfx.loc[dfx.index[i], 'OIL_CUMULATIVE_PRODUCTION'] = (
-            dfx.loc[dfx.index[i - 1], 'OIL_CUMULATIVE_PRODUCTION'] + days_diff * oil_rate
+            dfx.loc[dfx.index[i - 1], 'OIL_CUMULATIVE_PRODUCTION'] + oil_rate
         )
     
     best_b_oil, oil_exp_di, oil_har_di, oil_hyper_di, oil_exp_model, oil_har_model, oil_hyper_model, df_oil = ccf.process_data(excel_file, well_name, start_date, end_date, 'CORR_OIL_RATE_STBD', 'oil')
@@ -443,7 +452,7 @@ def update_plots(n_clicks, well_name, foil_date, months_end_date, slider_value, 
     last_rate = dfx[dfx['CORR_OIL_RATE_STBD'] != 0]['CORR_OIL_RATE_STBD'].iloc[-1] + rate_intervention
     qi = last_rate
 
-    foil_date = foil_date.replace(day=1)
+    # foil_date = foil_date.replace(day=1) # Enable this if the data is monthly
     end_date = foil_date + pd.DateOffset(months=months_end_date)
     date_range = pd.date_range(start=foil_date, end=end_date, freq='MS')
     marker_y = dfx[dfx['DATE_STAMP'] == start_date]['CORR_OIL_RATE_STBD'].values[0]
@@ -487,13 +496,17 @@ def update_plots(n_clicks, well_name, foil_date, months_end_date, slider_value, 
     reserves_exp = EUR_exp - dfx['OIL_CUMULATIVE_PRODUCTION'].iloc[-1]
     reserves_har = EUR_har - dfx['OIL_CUMULATIVE_PRODUCTION'].iloc[-1]
 
+    df_monthly = df[df['DATE_STAMP'].dt.is_month_start]
+
+# Plot with the filtered data
+
     if scatter:
         oil_fig = px.scatter(
-            df,
+            df_monthly,
             x='DATE_STAMP',
             y='CORR_OIL_RATE_STBD',
             title=f'Oil Rate Comparison of Decline Models Well {well_name}',
-            labels={'DATE_STAMP': 'Date', 'CORR_OIL_RATE_STBD': 'Oil Rate (bbl)'},
+            labels={'DATE_STAMP': 'Date', 'CORR_OIL_RATE_STBD': 'Oil Rate (bopd)'},
             color_discrete_sequence=['brown'],
             size_max=5,
             hover_data={'DATE_STAMP': True, 'CORR_OIL_RATE_STBD': True}
@@ -512,7 +525,7 @@ def update_plots(n_clicks, well_name, foil_date, months_end_date, slider_value, 
         if line:
             oil_fig.add_scatter(x=forecast_df['DATE'], y=forecast_df['Forecast_Oil_Exponential'], mode='lines', name=f'Exponential Forecast (b={b_value:.3f}, di={oil_exp_di:.2f}, qi={qi:.2f})', line=dict(color='LightBlue'))
         crossed = forecast_df[forecast_df['Forecast_Oil_Exponential'] <= limit_value]
-        reserves_output = "Reserves (Exponential): ", html.Span(f"{reserves_exp:.2f} stb", style={'fontWeight': 'bold'})
+        reserves_output = "Reserves (Exponential): ", html.Span(f"{reserves_exp:.2f} bbl", style={'fontWeight': 'bold'})
         val_reserves = reserves_exp
         val_di = oil_exp_di
         val_final_rate = forecast_df['Forecast_Oil_Exponential'].iloc[-1]
@@ -522,7 +535,7 @@ def update_plots(n_clicks, well_name, foil_date, months_end_date, slider_value, 
         if line:
             oil_fig.add_scatter(x=forecast_df['DATE'], y=forecast_df['Forecast_Oil_Harmonic'], mode='lines', name=f'Harmonic Forecast (b={b_value:.3f}, di={oil_har_di:.2f}, qi={qi:.2f})', line=dict(color='LightSalmon'))
         crossed = forecast_df[forecast_df['Forecast_Oil_Harmonic'] <= limit_value]
-        reserves_output = "Reserves (Harmonic): ", html.Span(f"{reserves_har:.2f} stb", style={'fontWeight': 'bold'})
+        reserves_output = "Reserves (Harmonic): ", html.Span(f"{reserves_har:.2f} bbl", style={'fontWeight': 'bold'})
         val_reserves = reserves_har
         val_di = oil_har_di
         val_final_rate = forecast_df['Forecast_Oil_Harmonic'].iloc[-1]
@@ -532,7 +545,7 @@ def update_plots(n_clicks, well_name, foil_date, months_end_date, slider_value, 
         if line:
             oil_fig.add_scatter(x=forecast_df['DATE'], y=forecast_df['Forecast_Oil_Hyperbolic'], mode='lines', name=f'Hyperbolic Forecast (b={b_value:.3f}, di={oil_hyper_di:.2f}, qi={qi:.2f})', line=dict(color='LightGreen'))
         crossed = forecast_df[forecast_df['Forecast_Oil_Hyperbolic'] <= limit_value]
-        reserves_output = "Reserves (Hyperbolic): ", html.Span(f"{reserves_hyper:.2f} stb", style={'fontWeight': 'bold'})
+        reserves_output = "Reserves (Hyperbolic): ", html.Span(f"{reserves_hyper:.2f} bbl", style={'fontWeight': 'bold'})
         val_reserves = reserves_hyper
         val_di = oil_hyper_di
         val_final_rate = forecast_df['Forecast_Oil_Hyperbolic'].iloc[-1]
@@ -540,7 +553,7 @@ def update_plots(n_clicks, well_name, foil_date, months_end_date, slider_value, 
         val_cum_prod = EUR_hyper - reserves_hyper
 
     if line:
-        oil_fig.add_scatter(x=[foil_date, end_date], y=[limit_value, limit_value], mode='lines', name=f'Rate Limit ({limit_value} bbl)', line=dict(color='red', dash='dash'))
+        oil_fig.add_scatter(x=[foil_date, end_date], y=[limit_value, limit_value], mode='lines', name=f'Rate Limit ({limit_value} bopd)', line=dict(color='red', dash='dash'))
 
     alert_message = []
     if not crossed.empty:
@@ -560,24 +573,24 @@ def update_plots(n_clicks, well_name, foil_date, months_end_date, slider_value, 
 
     oil_fig.update_layout(
         xaxis=dict(title='Date', tickformat='%d-%m-%Y'),
-        yaxis=dict(title='Oil Rate (bbl)'),
+        yaxis=dict(title='Oil Rate (bopd)'),
         legend_title="Legend"
     )
 
     # Hover Values
     oil_fig.update_traces(
         hovertemplate=(
-            "<b>Date</b>: %{x}<br>" +
-            "<b>Oil Rate</b>: %{y:.2f} bbl<br>" +
+            "<b>Date: %{x}</b><br>" +
+            "<b>Oil Rate: %{y:.2f} bopd</b><br>" +
             f"b: {b_value:.3f}<br>" +
             f"Di: {val_di:.7f} M.n.<br>" +
-            f"qi: {qi:.3f} bbl<br>" +
+            f"qi: {qi:.3f} bopd<br>" +
             f"ti: {foil_date.strftime('%m/%d/%Y')}<br>" +
             f"te: {end_date.strftime('%m/%d/%Y')}<br>" +
-            f"Final Rate: {val_final_rate:.4f} bbl<br>" +
+            f"Final Rate: {val_final_rate:.4f} bopd<br>" +
             f"Cum. Prod.: {val_cum_prod:.3f} bbl<br>" +
             f"Cum. Date: {end_dates.strftime('%m/%d/%Y')}<br>" +
-            f"Reserves: {val_reserves:.2f} stb<br>" +
+            f"Reserves: {val_reserves:.2f} bbl<br>" +
             f"Reserves Date: {end_date.strftime('%m/%d/%Y')}<br>" +
             f"EUR: {val_eur:.2f} <br>" +
             "<extra></extra>"
@@ -588,8 +601,9 @@ def update_plots(n_clicks, well_name, foil_date, months_end_date, slider_value, 
         "Well Name": well_name,
         "Start Date": start_date.strftime('%d-%m-%Y'),
         "End Date": end_dates.strftime('%d-%m-%Y'),
+        "b": b_value,
         "Start Forecast Date": foil_date.strftime('%d-%m-%Y'),
-        "Reserves (stb)": f"{val_reserves:.5f}",
+        "Reserves (bbl)": f"{val_reserves:.5f}",
         "Rate Intervention (bopd)": rate_intervention,
         "Cut Off Date": crossing_date.strftime('%d-%m-%Y') if not crossed.empty else "N/A"
     }
@@ -600,7 +614,7 @@ def update_plots(n_clicks, well_name, foil_date, months_end_date, slider_value, 
             rows[rows.index(existing_row)] = new_row
         else:
             rows.append(new_row)
-        rows = sorted(rows, key=lambda x: float(x['Reserves (stb)']), reverse=True)
+        rows = sorted(rows, key=lambda x: float(x['Reserves (bbl)']), reverse=True)
 
     return oil_fig, alert_message, reserves_output, rows, selectedData, b_value
 
@@ -619,4 +633,4 @@ def download_table(n_clicks, rows):
 if __name__ == '__main__':
     if os.environ.get("WERKZEUG_RUN_MAIN") == "true":
         webbrowser.open_new("http://127.0.0.1:8050/")
-    app.run_server(debug=True, dev_tools_ui=False)
+    app.run_server(debug=True, dev_tools_ui=True)
