@@ -1,12 +1,20 @@
 import pandas as pd
 import numpy as np
-import os
+import os, time, shutil
 from sklearn.ensemble import RandomForestRegressor
 from sklearn.preprocessing import MinMaxScaler
 import matplotlib.pyplot as plt
 
 def run_ml(filtered_df, start_date, end_date):
     folder_marker = 'export'
+    if os.path.exists(folder_marker):
+        for item in os.listdir(folder_marker):
+            item_path = os.path.join(folder_marker, item)
+            if os.path.isfile(item_path) or os.path.islink(item_path):
+                os.unlink(item_path)
+            elif os.path.isdir(item_path):
+                shutil.rmtree(item_path)
+
     matched_universal_values = filtered_df['Universal'].unique()
     dataset = filtered_df[filtered_df['Universal'].isin(matched_universal_values)]
 

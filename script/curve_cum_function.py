@@ -42,7 +42,6 @@ def process_data(excel_file, well_name, initial_date, final_date, rate_column, r
     df['TIME'] = range(len(df))
 
     df_filtered = df[(df['DATE_STAMP'] >= initial_date) & (df['DATE_STAMP'] <= final_date) & (df[rate_column] != 0)].copy()
-    df_filtered['TIME'] = range(len(df_filtered))
 
     initial_rate = df_filtered[rate_column].iloc[0]
     final_rate = df_filtered[rate_column].iloc[-1]

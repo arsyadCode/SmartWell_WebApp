@@ -21,6 +21,7 @@ targets = ['OIL', 'WATER', 'GAS']
 additional = ['Universal']
 
 directory_path = 'export'
+
 def generate_directory_structure(path):
     folder_content = []
     
@@ -53,6 +54,33 @@ app.layout = html.Div(
     children=[
         html.Div(
             children=[
+                html.Header([
+                    html.Nav([
+                        html.Nav([
+                            html.Div([
+                                html.Div([
+                                    html.Img(src="assets/logo.png", style={'width': '50px', 'height': '38.19px'}),
+                                    html.Div([
+                                        html.H1("WENNI", style={'fontWeight': '600', 'fontSize': "20px", 'color': '#006CB8', 'lineHeight': "25.2px"}),
+                                        html.P("Well Forecast and Monitoring", style={'fontWeight': '400', 'fontSize': "14px", 'color': '#9B9797', 'lineHeight': '17.64px'})
+                                    ], style={'flexDirection': 'column'})
+                                ], style={'display': 'flex', 'alignItems': 'center', 'gap': '13.11px', 'paddingTop': '27px'}),
+                                html.Img(src="assets/PHM.png", style={'width': '174px'})
+                            ], style={'backgroundColor': 'white', 'display': 'flex', 'justifyContent': 'space-between', 'alignItems': 'center', 'width': '100%', 'paddingLeft': '37px', 'paddingRight': '37px', 'borderBottomLeftRadius': "20px", 'borderBottomRightRadius': '20px'})
+                        ], style={'backgroundColor': '#C3304A', 'display': 'flex', 'justifyContent': 'space-between', 'alignItems': 'center', 'width': '100%', 'paddingBottom': '20px', 'borderBottomLeftRadius': "20px", 'borderBottomRightRadius': '20px'}),
+                        html.Nav([
+                            html.Div([
+                                html.P("Historical", style={"fontWeight": "400", "fontSize": '16px', "color": 'white'}),
+                                html.P("DCA", style={"fontWeight": "400", 'fontSize': '16px', "color": 'white'}),
+                                html.P('Forecast', style={"fontWeight": "800", "fontSize": '16px', "color": 'white'})
+                            ], style={'display': 'flex', 'alignItems': 'center', 'gap': '71px', 'paddingLeft': '35px'}),
+                            html.Div([
+                                html.H1('Admin 1', style={"fontWeight": "700", 'fontSize': '16px', "color": 'white'}),
+                                html.P('Role Admin', style={"fontWeight": "400", "fontSize": '14px', "color": 'white'})
+                            ], style={'display': 'flex', 'flexDirection': 'column', 'gap':'1px', 'paddingRight': '35px'})
+                        ], style={'display': 'flex', 'alignItems': 'center', 'justifyContent': 'space-between', 'width': '100%', 'paddingLeft': '76px', 'paddingRight': '76px', 'paddingTop': '30px', 'paddingBottom': '30px'})
+                    ], style={'backgroundColor': '#3F849B', 'display': 'flex', 'flexDirection': 'column', 'justifyContent': 'space-between', 'alignItems': 'center', 'width': '100%'})
+                ], style={'width': '100%', 'display': "flex", 'flexDirection': 'column'}),
                 html.H1("Bekapai DataFrame Display (WIP)",
                         style={'text-align': 'center', 'margin-bottom': '30px', 'position': 'sticky', 'top': 0, 'z-index': 9999, 'background-color': '#f9f9f9', 'padding': '10px'}),
             ]
@@ -442,4 +470,4 @@ def display_file_preview(n_clicks_list, file_ids):
 if __name__ == '__main__':
     if os.environ.get("WERKZEUG_RUN_MAIN") == "true":
         webbrowser.open_new("http://127.0.0.1:8050/")
-    app.run_server(debug=True, dev_tools_ui=False)
+    app.run_server(debug=True, dev_tools_ui=True)

@@ -13,7 +13,7 @@ import tempfile
 app = dash.Dash(__name__, external_stylesheets=[dbc.themes.BOOTSTRAP])
 app.title = 'DCA'
 UPLOAD_DIRECTORY = os.path.join(os.path.dirname(__file__), '../Data')
-excel_file = './Data/data_resampling_dailyX.xlsx'
+excel_file = './Data/show_data.xlsx'
 xls = pd.ExcelFile(excel_file)
 sheet_names = xls.sheet_names
 
@@ -86,21 +86,21 @@ app.layout = html.Div([
                         html.Div([
                             html.H1("WENNI", style={'fontWeight': '600', 'fontSize': "20px", 'color': '#006CB8', 'lineHeight': "25.2px"}),
                             html.P("Well Forecast and Monitoring", style={'fontWeight': '400', 'fontSize': "14px", 'color': '#9B9797', 'lineHeight': '17.64px'})
-                        ], style={'display': 'flex', 'flexDirection': 'column'})
+                        ], style={'flexDirection': 'column'})
                     ], style={'display': 'flex', 'alignItems': 'center', 'gap': '13.11px', 'paddingTop': '27px'}),
-                    html.Img(src="assets/PHM.png", style={'width': '174px', 'height': '47px'})
+                    html.Img(src="assets/PHM.png", style={'width': '174px'})
                 ], style={'backgroundColor': 'white', 'display': 'flex', 'justifyContent': 'space-between', 'alignItems': 'center', 'width': '100%', 'paddingLeft': '37px', 'paddingRight': '37px', 'borderBottomLeftRadius': "20px", 'borderBottomRightRadius': '20px'})
             ], style={'backgroundColor': '#C3304A', 'display': 'flex', 'justifyContent': 'space-between', 'alignItems': 'center', 'width': '100%', 'paddingBottom': '20px', 'borderBottomLeftRadius': "20px", 'borderBottomRightRadius': '20px'}),
             html.Nav([
                 html.Div([
                     html.P("Historical", style={"fontWeight": "400", "fontSize": '16px', "color": 'white'}),
-                    html.P("DCA", style={"fontWeight": "700", 'fontSize': '16px', "color": 'white'}),
+                    html.P("DCA", style={"fontWeight": "800", 'fontSize': '16px', "color": 'white'}),
                     html.P('Forecast', style={"fontWeight": "400", "fontSize": '16px', "color": 'white'})
-                ], style={'display': 'flex', 'alignItems': 'center', 'gap': '71px'}),
+                ], style={'display': 'flex', 'alignItems': 'center', 'gap': '71px', 'paddingLeft': '35px'}),
                 html.Div([
                     html.H1('Admin 1', style={"fontWeight": "700", 'fontSize': '16px', "color": 'white'}),
-                    html.P('Role admin', style={"fontWeight": "400", "fontSize": '14px', "color": 'white'})
-                ], style={'display': 'flex', 'flexDirection': 'column', 'gap':'1px'})
+                    html.P('Role Admin', style={"fontWeight": "400", "fontSize": '14px', "color": 'white'})
+                ], style={'display': 'flex', 'flexDirection': 'column', 'gap':'1px', 'paddingRight': '35px'})
             ], style={'display': 'flex', 'alignItems': 'center', 'justifyContent': 'space-between', 'width': '100%', 'paddingLeft': '76px', 'paddingRight': '76px', 'paddingTop': '30px', 'paddingBottom': '30px'})
         ], style={'backgroundColor': '#3F849B', 'display': 'flex', 'flexDirection': 'column', 'justifyContent': 'space-between', 'alignItems': 'center', 'width': '100%'})
     ], style={'width': '100%', 'display': "flex", 'flexDirection': 'column'}),
@@ -467,7 +467,7 @@ def update_plots(n_clicks, well_name, foil_date, months_end_date, slider_value, 
     dfx = df.loc[mask].copy()
 
     dfx['OIL_CUMULATIVE_PRODUCTION'] = 0.0
-    # Calculate cumulative production on a monthly basis
+    # Calculate cumulative production on a monthly basis into daily basis
     # for i in range(1, len(dfx)):
     #     days_diff = (dfx.loc[dfx.index[i], 'DATE_STAMP'] - dfx.loc[dfx.index[i - 1], 'DATE_STAMP']).days
     #     oil_rate = dfx.loc[dfx.index[i - 1], 'CORR_OIL_RATE_STBD']
@@ -552,13 +552,13 @@ def update_plots(n_clicks, well_name, foil_date, months_end_date, slider_value, 
     oil_fig.update_layout(showlegend=show_legend)
     
     if line:
-        oil_fig.add_scatter(x=df_oil['DATE_STAMP'], y=oil_exp_model, mode='lines', name='Exponential Model', line=dict(color='blue'))
-        oil_fig.add_scatter(x=df_oil['DATE_STAMP'], y=oil_hyper_model, mode='lines', name=f'Hyperbolic Model (best b = {best_b_oil})', line=dict(color='green'))
-        oil_fig.add_scatter(x=df_oil['DATE_STAMP'], y=oil_har_model, mode='lines', name='Harmonic Model', line=dict(color='orange'))
+        oil_fig.add_scatter(x=df_oil['DATE_STAMP'], y=np.array(oil_exp_model), mode='lines', name='Exponential Model', line=dict(color='blue'))
+        oil_fig.add_scatter(x=df_oil['DATE_STAMP'], y=np.array(oil_hyper_model), mode='lines', name=f'Hyperbolic Model (best b = {best_b_oil})', line=dict(color='green'))
+        oil_fig.add_scatter(x=df_oil['DATE_STAMP'], y=np.array(oil_har_model), mode='lines', name='Harmonic Model', line=dict(color='orange'))
 
     if b_value == 0.000:
         if line:
-            oil_fig.add_scatter(x=forecast_df['DATE'], y=forecast_df['Forecast_Oil_Exponential'], mode='lines', name=f'Exponential Forecast (b={b_value:.3f}, di={oil_exp_di:.2f}, qi={qi:.2f})', line=dict(color='LightBlue'))
+            oil_fig.add_scatter(x=forecast_df['DATE'], y=forecast_df['Forecast_Oil_Exponential'].values, mode='lines', name=f'Exponential Forecast (b={b_value:.3f}, di={oil_exp_di:.2f}, qi={qi:.2f})', line=dict(color='LightBlue'))
         crossed = forecast_df[forecast_df['Forecast_Oil_Exponential'] <= limit_value]
         reserves_output = "Reserves (Exponential): ", html.Span(f"{reserves_exp:.2f} bbl", style={'fontWeight': 'bold'})
         val_reserves = reserves_exp
@@ -568,7 +568,7 @@ def update_plots(n_clicks, well_name, foil_date, months_end_date, slider_value, 
         val_cum_prod = EUR_exp - reserves_exp
     elif b_value == 1.000:
         if line:
-            oil_fig.add_scatter(x=forecast_df['DATE'], y=forecast_df['Forecast_Oil_Harmonic'], mode='lines', name=f'Harmonic Forecast (b={b_value:.3f}, di={oil_har_di:.2f}, qi={qi:.2f})', line=dict(color='LightSalmon'))
+            oil_fig.add_scatter(x=forecast_df['DATE'], y=forecast_df['Forecast_Oil_Harmonic'].values, mode='lines', name=f'Harmonic Forecast (b={b_value:.3f}, di={oil_har_di:.2f}, qi={qi:.2f})', line=dict(color='LightSalmon'))
         crossed = forecast_df[forecast_df['Forecast_Oil_Harmonic'] <= limit_value]
         reserves_output = "Reserves (Harmonic): ", html.Span(f"{reserves_har:.2f} bbl", style={'fontWeight': 'bold'})
         val_reserves = reserves_har
@@ -578,7 +578,7 @@ def update_plots(n_clicks, well_name, foil_date, months_end_date, slider_value, 
         val_cum_prod = EUR_har - reserves_har
     else:
         if line:
-            oil_fig.add_scatter(x=forecast_df['DATE'], y=forecast_df['Forecast_Oil_Hyperbolic'], mode='lines', name=f'Hyperbolic Forecast (b={b_value:.3f}, di={oil_hyper_di:.2f}, qi={qi:.2f})', line=dict(color='LightGreen'))
+            oil_fig.add_scatter(x=forecast_df['DATE'], y=forecast_df['Forecast_Oil_Hyperbolic'].values, mode='lines', name=f'Hyperbolic Forecast (b={b_value:.3f}, di={oil_hyper_di:.2f}, qi={qi:.2f})', line=dict(color='LightGreen'))
         crossed = forecast_df[forecast_df['Forecast_Oil_Hyperbolic'] <= limit_value]
         reserves_output = "Reserves (Hyperbolic): ", html.Span(f"{reserves_hyper:.2f} bbl", style={'fontWeight': 'bold'})
         val_reserves = reserves_hyper
@@ -668,4 +668,4 @@ def download_table(n_clicks, rows):
 if __name__ == '__main__':
     if os.environ.get("WERKZEUG_RUN_MAIN") == "true":
         webbrowser.open_new("http://127.0.0.1:8050/")
-    app.run_server(debug=True, dev_tools_ui=False)
+    app.run_server(debug=True, dev_tools_ui=True)
