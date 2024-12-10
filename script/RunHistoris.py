@@ -96,8 +96,8 @@ app.layout = html.Div([
             ], style={'display': 'flex', 'alignItems': 'center', 'justifyContent': 'space-between', 'width': '100%', 'paddingLeft': '76px', 'paddingRight': '76px', 'paddingTop': '30px', 'paddingBottom': '30px'})
         ], style={'backgroundColor': '#3F849B', 'display': 'flex', 'flexDirection': 'column', 'justifyContent': 'space-between', 'alignItems': 'center', 'width': '100%'})
     ], style={'width': '100%', 'display': "flex", 'flexDirection': 'column'}),
-    html.Div(style={'display': 'flex', 'flexDirection': 'column', 'alignItems': 'center', 'justifyContent': 'center'}, children=[
-        html.Div(style={'width': "100%", 'alignItems': 'start', 'display': 'flex', 'paddingLeft': '370px'}, children=[    
+    html.Div(style={'display': 'flex', 'alignItems': 'center', 'justifyContent': 'center', 'width': "100%", 'paddingBottom': '20px'}, children=[
+        html.Div([    
             html.Button(children=[
                 html.Img(src="assets/upload.png", style={'width': '18px', 'height': '15.65px'}),
                 html.H1("Upload File", style={'fontSize': '16px', 'fontWeight': '500', 'color': '#3F849B'})
@@ -128,100 +128,100 @@ app.layout = html.Div([
                     'backgroundColor': 'rgba(0, 0, 0, 0.5)', 'alignItems': 'center', 'justifyContent': 'center'
                 }
             ),
-        ]),
-        html.Div(style={'display': 'flex','justifyContent': 'center', 'width': "100rem", 'padding': '20px', 'gap': '30px'}, children=[
-            html.Div(style={'display': 'flex', 'flexDirection': 'column', 'gap': '10px', 'width': '25rem', 'alignItems': 'end'}, children=[
-                html.Div(className='feature-container', style={'border': '1px solid #3F849B', 'padding': '0', 'borderRadius': '16px', 'width': '174px', 'height': '130px'}, children=[
-                    html.H1('Skala Rate', className='Feature-title', style={'color': 'white', 'fontWeight': '700', 'fontSize': '16px', 'padding': '8px 17px', 'backgroundColor': '#3F849B', 'borderRadius': '10px'}),
-                    html.Div(style={'padding': '10px 25px'}, children=[
-                        dcc.RadioItems(
-                            id="dropdown-scale",
-                            options=[
-                                {'label': 'Linear', 'value': 'linear'},
-                                {'label': 'Logaritmik', 'value': 'log'},
-                            ],
-                            value='linear', 
-                            labelStyle={'display': 'flex', 'marginBottom': '9.5px', 'gap': '15px', 'alignItems': 'center', 'fontWeight': '400', 'fontSize': '14px', 'color': '#616161'},
-                            inputStyle={'transform': 'scale(1.5)', 'borderRadius': '6px'}
-                        ),
-                    ])
-                ]),
-                html.Div(className='feature-container', style={'border': '1px solid #3F849B', 'padding': '0', 'borderRadius': '16px', 'width': '174px', 'height': '93px'}, children=[
-                    html.H1('Legend', className='Feature-title', style={'color': 'white', 'fontWeight': '700', 'fontSize': '16px', 'padding': '8px 17px', 'backgroundColor': '#3F849B', 'borderRadius': '10px'}),
-                    html.Div(style={'padding': '10px 25px'}, children=[
-                        dcc.Checklist(
-                            id='legend-status',
-                            options=[
-                                {'label': 'Enable', 'value': 'on'},
-                            ],
-                            value=['on'], 
-                            labelStyle={'display': 'flex', 'marginBottom': '9.5px', 'gap': '15px', 'alignItems': 'center', 'fontWeight': '400', 'fontSize': '14px', 'color': '#616161'},
-                            inputStyle={'transform': 'scale(1.5)', 'borderRadius': '6px'}
-                        ),
+            html.Div(style={'display': 'flex', 'gap': 28, 'paddingTop': '17px'}, children=[
+                html.Div(style={'display': 'flex', 'flexDirection': 'column', 'gap': '10px'}, children=[
+                    html.Div(className='feature-container', style={'border': '1px solid #3F849B', 'padding': '0', 'borderRadius': '16px', 'width': '174px', 'height': '130px'}, children=[
+                        html.H1('Skala Rate', className='Feature-title', style={'color': 'white', 'fontWeight': '700', 'fontSize': '16px', 'padding': '8px 17px', 'backgroundColor': '#3F849B', 'borderRadius': '10px'}),
+                        html.Div(style={'padding': '10px 25px'}, children=[
+                            dcc.RadioItems(
+                                id="dropdown-scale",
+                                options=[
+                                    {'label': 'Linear', 'value': 'linear'},
+                                    {'label': 'Logaritmik', 'value': 'log'},
+                                ],
+                                value='linear', 
+                                labelStyle={'display': 'flex', 'marginBottom': '9.5px', 'gap': '15px', 'alignItems': 'center', 'fontWeight': '400', 'fontSize': '14px', 'color': '#616161'},
+                                inputStyle={'transform': 'scale(1.5)', 'borderRadius': '6px'}
+                            ),
+                        ])
                     ]),
-                ]),
-                html.Div(className='feature-container', style={'border': '1px solid #3F849B', 'padding': '0', 'borderRadius': '16px', 'width': '174px', 'height': '163px'}, children=[
-                    html.H1('Object', className='Feature-title', style={'color': 'white', 'fontWeight': '700', 'fontSize': '16px', 'padding': '8px 17px', 'backgroundColor': '#3F849B', 'borderRadius': '10px'}),
-                    html.Div(style={'padding': '10px 25px'}, children=[
-                        dcc.Checklist(
-                            id='plot-type',
-                            options=[
-                                {'label': 'Gas Rate', 'value': 'Gas'},
-                                {'label': 'Water Rate', 'value': 'Water'},
-                                {'label': 'Oil Rate', 'value': 'Oil'},
-                            ],
-                            value=['Gas', 'Water', 'Oil'], 
-                            labelStyle={'display': 'flex', 'marginBottom': '9.5px', 'gap': '15px', 'alignItems': 'center', 'fontWeight': '400', 'fontSize': '14px', 'color': '#616161'},
-                            inputStyle={'transform': 'scale(1.5)', 'borderRadius': '6px'}
-                        ),
-                    ])
-                ]),
-                html.Div(className='feature-container', style={'border': '1px solid #3F849B', 'padding': '0', 'borderRadius': '16px', 'width': '174px', 'height': '130px'}, children=[
-                    html.H1('Plot Area', className='Feature-title', style={'color': 'white', 'fontWeight': '700', 'fontSize': '16px', 'padding': '8px 17px', 'backgroundColor': '#3F849B', 'borderRadius': '10px'}),
-                    html.Div(style={'padding': '10px 25px'}, children=[
-                        dcc.RadioItems(
-                            id="",
-                            options=[
-                                {'label': 'Single Plot', 'value': 'single'},
-                                {'label': 'Multi-Plot', 'value': 'multi', 'disabled': True},
-                            ],
-                            value='single', 
-                            labelStyle={'display': 'flex', 'marginBottom': '9.5px', 'gap': '15px', 'alignItems': 'center', 'fontWeight': '400', 'fontSize': '14px', 'color': '#616161'},
-                            inputStyle={'transform': 'scale(1.5)', 'borderRadius': '6px'},
-                        ),
-                    ])
-                ]),
-            ]),
-            html.Div(style={"width": '50rem'}, children=[
-                dcc.Tabs(id='tab-container',
-                    value='B-L-18',
-                    children=[],
-                    content_style={'textAlign':'center'}
-                ),
-                html.Div(style={'border': '1px solid grey', 'padding': '21px', 'borderBottomLeftRadius': '30px', 'borderBottomRightRadius': '30px', 'borderTopRightRadius': '30px', 'width': '100%'}, children=[
-                    dbc.Row([
-                        dbc.Col(dcc.Graph(id='combined-graph', config={"displayModeBar": False}), width=12),
-                    ]),
-                ])            
-            ]),
-            html.Div(style={'display': 'flex', 'flexDirection': 'column', 'gap': '10px', 'width': '25rem'}, children=[
-                html.Div(className='feature-container', style={'border': '1px solid #3F849B', 'padding': '0', 'borderRadius': '16px', 'width': '229px', 'minHeight': '40px'}, children=[
-                    html.H1('Objects', className='Feature-title', style={'color': 'white', 'fontWeight': '700', 'fontSize': '16px', 'padding': '8px 17px', 'backgroundColor': '#3F849B', 'borderRadius': '10px'}),
-                    html.Div(style={'padding': '10px', 'display': 'flex', 'flexDirection': 'column', 'gap': '10px'}, children=[
-                        html.Div(style={'fontWeight': '400', 'fontSize': '14px', 'color': '#616161', 'display': 'none'}, children=[
-                            html.Label('Select Well:', style={'fontWeight': '400', 'fontSize': '14px', 'color': '#616161'}),
-                            dcc.Dropdown(
-                                id='dropdown-well', 
-                                options=[{'label': value, 'value': value} for value in sorted(df['Universal'].unique())],
-                                value=sorted(df['Universal'].unique())[0],
-                                clearable=False,
-                            )
+                    html.Div(className='feature-container', style={'border': '1px solid #3F849B', 'padding': '0', 'borderRadius': '16px', 'width': '174px', 'height': '93px'}, children=[
+                        html.H1('Legend', className='Feature-title', style={'color': 'white', 'fontWeight': '700', 'fontSize': '16px', 'padding': '8px 17px', 'backgroundColor': '#3F849B', 'borderRadius': '10px'}),
+                        html.Div(style={'padding': '10px 25px'}, children=[
+                            dcc.Checklist(
+                                id='legend-status',
+                                options=[
+                                    {'label': 'Enable', 'value': 'on'},
+                                ],
+                                value=['on'], 
+                                labelStyle={'display': 'flex', 'marginBottom': '9.5px', 'gap': '15px', 'alignItems': 'center', 'fontWeight': '400', 'fontSize': '14px', 'color': '#616161'},
+                                inputStyle={'transform': 'scale(1.5)', 'borderRadius': '6px'}
+                            ),
                         ]),
-                        html.Div(children=create_nested_checkboxes(Objects))
-                    ])
-                ]), 
+                    ]),
+                    html.Div(className='feature-container', style={'border': '1px solid #3F849B', 'padding': '0', 'borderRadius': '16px', 'width': '174px', 'height': '163px'}, children=[
+                        html.H1('Object', className='Feature-title', style={'color': 'white', 'fontWeight': '700', 'fontSize': '16px', 'padding': '8px 17px', 'backgroundColor': '#3F849B', 'borderRadius': '10px'}),
+                        html.Div(style={'padding': '10px 25px'}, children=[
+                            dcc.Checklist(
+                                id='plot-type',
+                                options=[
+                                    {'label': 'Gas Rate', 'value': 'Gas'},
+                                    {'label': 'Water Rate', 'value': 'Water'},
+                                    {'label': 'Oil Rate', 'value': 'Oil'},
+                                ],
+                                value=['Gas', 'Water', 'Oil'], 
+                                labelStyle={'display': 'flex', 'marginBottom': '9.5px', 'gap': '15px', 'alignItems': 'center', 'fontWeight': '400', 'fontSize': '14px', 'color': '#616161'},
+                                inputStyle={'transform': 'scale(1.5)', 'borderRadius': '6px'}
+                            ),
+                        ])
+                    ]),
+                    html.Div(className='feature-container', style={'border': '1px solid #3F849B', 'padding': '0', 'borderRadius': '16px', 'width': '174px', 'height': '130px'}, children=[
+                        html.H1('Plot Area', className='Feature-title', style={'color': 'white', 'fontWeight': '700', 'fontSize': '16px', 'padding': '8px 17px', 'backgroundColor': '#3F849B', 'borderRadius': '10px'}),
+                        html.Div(style={'padding': '10px 25px'}, children=[
+                            dcc.RadioItems(
+                                id="",
+                                options=[
+                                    {'label': 'Single Plot', 'value': 'single'},
+                                    {'label': 'Multi-Plot', 'value': 'multi', 'disabled': True},
+                                ],
+                                value='single', 
+                                labelStyle={'display': 'flex', 'marginBottom': '9.5px', 'gap': '15px', 'alignItems': 'center', 'fontWeight': '400', 'fontSize': '14px', 'color': '#616161'},
+                                inputStyle={'transform': 'scale(1.5)', 'borderRadius': '6px'},
+                            ),
+                        ])
+                    ]),
+                ]),
+                html.Div(style={"width": '50rem'}, children=[
+                    dcc.Tabs(id='tab-container',
+                        value='B-L-18',
+                        children=[],
+                        content_style={'textAlign':'center'}
+                    ),
+                    html.Div(style={'border': '1px solid grey', 'padding': '21px', 'borderBottomLeftRadius': '30px', 'borderBottomRightRadius': '30px', 'borderTopRightRadius': '30px', 'width': '100%'}, children=[
+                        dbc.Row([
+                            dbc.Col(dcc.Graph(id='combined-graph', config={"displayModeBar": False}), width=12),
+                        ]),
+                    ])            
+                ]),
+                html.Div(style={'display': 'flex', 'flexDirection': 'column', 'gap': '10px', 'width': '25rem'}, children=[
+                    html.Div(className='feature-container', style={'border': '1px solid #3F849B', 'padding': '0', 'borderRadius': '16px', 'width': '229px', 'minHeight': '40px'}, children=[
+                        html.H1('Objects', className='Feature-title', style={'color': 'white', 'fontWeight': '700', 'fontSize': '16px', 'padding': '8px 17px', 'backgroundColor': '#3F849B', 'borderRadius': '10px'}),
+                        html.Div(style={'padding': '10px', 'display': 'flex', 'flexDirection': 'column', 'gap': '10px'}, children=[
+                            html.Div(style={'fontWeight': '400', 'fontSize': '14px', 'color': '#616161', 'display': 'none'}, children=[
+                                html.Label('Select Well:', style={'fontWeight': '400', 'fontSize': '14px', 'color': '#616161'}),
+                                dcc.Dropdown(
+                                    id='dropdown-well', 
+                                    options=[{'label': value, 'value': value} for value in sorted(df['Universal'].unique())],
+                                    value=sorted(df['Universal'].unique())[0],
+                                    clearable=False,
+                                )
+                            ]),
+                            html.Div(children=create_nested_checkboxes(Objects))
+                        ])
+                    ]), 
+                ]),
+                dcc.Location(id="page-reloader", refresh=True)
             ]),
-            dcc.Location(id="page-reloader", refresh=True)
         ]),
     ]),
 ])
