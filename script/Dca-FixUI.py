@@ -450,8 +450,8 @@ def update_plots(n_clicks, well_name, foil_date, months_end_date, slider_value, 
     if rows is None:
         rows = [] 
 
-    show_legend = 'on' in legend_status;
-    scatter = 'scatter' in plot_type;
+    show_legend = 'on' in legend_status
+    scatter = 'scatter' in plot_type
     line = 'line' in plot_type;
 
     foil_date = pd.to_datetime(foil_date)
