@@ -230,7 +230,7 @@ def save_file(contents, filename):
     content_type, content_string = contents.split(',')
     decoded = base64.b64decode(content_string)
     
-    file_path = os.path.join(csv_file)
+    file_path = os.path.join(excel_file)
     with open(file_path, "wb") as f:
         f.write(decoded)
 
