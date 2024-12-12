@@ -9,10 +9,11 @@ from dash.dependencies import ALL
 app = dash.Dash(__name__, external_stylesheets=[dbc.themes.BOOTSTRAP], title="Smart Well Monitoring", suppress_callback_exceptions=True)
 server = app.server
 
-# Load data from CSV files
-df = pd.read_csv("Data/monthly_rate_per_day_combined_with_pi.csv")
-df2 = pd.read_csv("Data/pi_sensor_per_month.csv")
-dfPlot = pd.read_csv("Data/combined_view.csv")
+# Load data from Excel file with multiple sheets
+excel_file = pd.ExcelFile("Data/historicalData.xlsx")
+df = pd.read_excel(excel_file, sheet_name="monthly_rate_per_day_combined")
+df2 = pd.read_excel(excel_file, sheet_name="pi_sensor_per_month")
+dfPlot = pd.read_excel(excel_file, sheet_name="plot_data")
 
 # Convert date columns to datetime format
 df['MDATE'] = pd.to_datetime(df['MDATE'], format='%m/%d/%Y')
@@ -180,9 +181,9 @@ app.layout = html.Div([
                                 id="",
                                 options=[
                                     {'label': 'Single Plot', 'value': 'single', 'disabled': True},
-                                    {'label': 'Multi-Plot', 'value': 'multi'},
+                                    {'label': 'Multi Plot', 'value': 'multi'},
                                 ],
-                                value='single', 
+                                value='multi', 
                                 labelStyle={'display': 'flex', 'marginBottom': '9.5px', 'gap': '15px', 'alignItems': 'center', 'fontWeight': '400', 'fontSize': '14px', 'color': '#616161'},
                                 inputStyle={'transform': 'scale(1.5)', 'borderRadius': '6px'},
                             ),

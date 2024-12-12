@@ -5,8 +5,8 @@ import plotly.graph_objects as go
 import dash_bootstrap_components as dbc
 import base64
 
-csv_file = "Data/monthly_rate_per_day_combined_with_pi.csv"
-df = pd.read_csv(csv_file)
+excel_file = pd.ExcelFile("Data/historicalData.xlsx")
+df = pd.read_excel(excel_file, sheet_name="monthly_rate_per_day_combined")
 df['MDATE'] = pd.to_datetime(df['MDATE'], format='%m/%d/%Y')
 
 app = Dash(__name__, external_stylesheets=[dbc.themes.BOOTSTRAP])
@@ -131,13 +131,13 @@ app.layout = html.Div([
             html.Div(style={'display': 'flex', 'gap': 28, 'paddingTop': '17px'}, children=[
                 html.Div(style={'display': 'flex', 'flexDirection': 'column', 'gap': '10px'}, children=[
                     html.Div(className='feature-container', style={'border': '1px solid #3F849B', 'padding': '0', 'borderRadius': '16px', 'width': '174px', 'height': '130px'}, children=[
-                        html.H1('Skala Rate', className='Feature-title', style={'color': 'white', 'fontWeight': '700', 'fontSize': '16px', 'padding': '8px 17px', 'backgroundColor': '#3F849B', 'borderRadius': '10px'}),
+                        html.H1('Rate Scale', className='Feature-title', style={'color': 'white', 'fontWeight': '700', 'fontSize': '16px', 'padding': '8px 17px', 'backgroundColor': '#3F849B', 'borderRadius': '10px'}),
                         html.Div(style={'padding': '10px 25px'}, children=[
                             dcc.RadioItems(
                                 id="dropdown-scale",
                                 options=[
                                     {'label': 'Linear', 'value': 'linear'},
-                                    {'label': 'Logaritmik', 'value': 'log'},
+                                    {'label': 'Logarithmic', 'value': 'log'},
                                 ],
                                 value='linear', 
                                 labelStyle={'display': 'flex', 'marginBottom': '9.5px', 'gap': '15px', 'alignItems': 'center', 'fontWeight': '400', 'fontSize': '14px', 'color': '#616161'},
@@ -182,7 +182,7 @@ app.layout = html.Div([
                                 id="",
                                 options=[
                                     {'label': 'Single Plot', 'value': 'single'},
-                                    {'label': 'Multi-Plot', 'value': 'multi', 'disabled': True},
+                                    {'label': 'Multi Plot', 'value': 'multi', 'disabled': True},
                                 ],
                                 value='single', 
                                 labelStyle={'display': 'flex', 'marginBottom': '9.5px', 'gap': '15px', 'alignItems': 'center', 'fontWeight': '400', 'fontSize': '14px', 'color': '#616161'},
