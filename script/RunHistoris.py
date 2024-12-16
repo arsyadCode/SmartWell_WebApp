@@ -159,15 +159,17 @@ app.layout = html.Div([
                             ),
                         ]),
                     ]),
-                    html.Div(className='feature-container', style={'border': '1px solid #3F849B', 'padding': '0', 'borderRadius': '16px', 'width': '174px', 'height': '163px'}, children=[
+                    html.Div(className='feature-container', style={'border': '1px solid #3F849B', 'padding': '0', 'borderRadius': '16px', 'width': '174px', 'height': '223px'}, children=[
                         html.H1('Object', className='Feature-title', style={'color': 'white', 'fontWeight': '700', 'fontSize': '16px', 'padding': '8px 17px', 'backgroundColor': '#3F849B', 'borderRadius': '10px'}),
                         html.Div(style={'padding': '10px 25px'}, children=[
                             dcc.Checklist(
-                                id='plot-type',
+                                id='figure-checklist',
                                 options=[
                                     {'label': 'Gas Rate', 'value': 'Gas'},
                                     {'label': 'Water Rate', 'value': 'Water'},
                                     {'label': 'Oil Rate', 'value': 'Oil'},
+                                    {'label': "WHP Rate", 'value': "WHP Rate", 'disabled': True},
+                                    {'label': "WHT Rate", 'value': "WHT Rate", 'disabled': True}
                                 ],
                                 value=['Gas', 'Water', 'Oil'], 
                                 labelStyle={'display': 'flex', 'marginBottom': '9.5px', 'gap': '15px', 'alignItems': 'center', 'fontWeight': '400', 'fontSize': '14px', 'color': '#616161'},
@@ -179,10 +181,10 @@ app.layout = html.Div([
                         html.H1('Plot Area', className='Feature-title', style={'color': 'white', 'fontWeight': '700', 'fontSize': '16px', 'padding': '8px 17px', 'backgroundColor': '#3F849B', 'borderRadius': '10px'}),
                         html.Div(style={'padding': '10px 25px'}, children=[
                             dcc.RadioItems(
-                                id="",
+                                id="plot-type",
                                 options=[
                                     {'label': 'Single Plot', 'value': 'single'},
-                                    {'label': 'Multi Plot', 'value': 'multi', 'disabled': True},
+                                    {'label': 'Multi Plot', 'value': 'multi'},
                                 ],
                                 value='single', 
                                 labelStyle={'display': 'flex', 'marginBottom': '9.5px', 'gap': '15px', 'alignItems': 'center', 'fontWeight': '400', 'fontSize': '14px', 'color': '#616161'},
@@ -199,7 +201,9 @@ app.layout = html.Div([
                     ),
                     html.Div(style={'border': '1px solid grey', 'padding': '21px', 'borderBottomLeftRadius': '30px', 'borderBottomRightRadius': '30px', 'borderTopRightRadius': '30px', 'width': '100%'}, children=[
                         dbc.Row([
-                            dbc.Col(dcc.Graph(id='combined-graph', config={"displayModeBar": False}), width=12),
+                            dbc.Col(html.Div(id='combined-graph', children=[
+                                
+                            ]), width=12),
                         ]),
                     ])            
                 ]),
@@ -264,7 +268,7 @@ def toggle_upload_modal(open_clicks, close_clicks, contents, filename):
     State({'type': 'sub-checkbox', 'name': ALL}, 'value')
 )
 def update_sub_checkboxes(main_checked, sub_label_style, value):
-    defaultStyle = {'display': 'flex', 'marginBottom': '19px', 'gap': '15px', 'align-items': 'center', 'fontWeight': '400', 'fontSize': '14px', 'color': '#616161'}
+    defaultStyle = {'display': 'flex', 'marginBottom': '19px', 'gap': '15px', 'alignItems': 'center', 'fontWeight': '400', 'fontSize': '14px', 'color': '#616161'}
     if main_checked[0] != [] :
         return [defaultStyle for _ in sub_label_style], value
     else:
@@ -275,7 +279,7 @@ def update_sub_checkboxes(main_checked, sub_label_style, value):
     Input({'type': 'sub-checkbox', 'name': ALL}, 'value')
 )
 def update_detail_checkboxes(sub_checked):
-    default_style = {'display': 'flex', 'marginBottom': '19px', 'gap': '15px', 'align-items': 'center', 'fontWeight': '400', 'fontSize': '14px', 'color': '#616161'}
+    default_style = {'display': 'flex', 'marginBottom': '19px', 'gap': '15px', 'alignItems': 'center', 'fontWeight': '400', 'fontSize': '14px', 'color': '#616161'}
     style = []
     for items in sub_checked:
         if items != []:
@@ -308,71 +312,77 @@ def update_tabs(selected_items):
         tabs.insert(0, tab_button)
     return tabs
 
-@app.callback(
-    Output('combined-graph', 'figure'),
-    [
-     Input('dropdown-well', 'value'),
-     Input('dropdown-scale', 'value'),
-    ],
-     Input('legend-status', 'value'),
-     Input('plot-type', 'value'),
-)
-def update_graph(selected_well, y_axis_type, legend_status, plot_type):
-    show_legend = 'on' in legend_status
-    gas = 'Gas' in plot_type
-    water = 'Water' in plot_type
-    oil = 'Oil' in plot_type
 
-    filtered_df = df[df['Universal'] == selected_well]
 
-    fig = go.Figure()
-
-    if(oil):
-        fig.add_trace(go.Scatter(
-            x=filtered_df['MDATE'],
-            y=filtered_df['OIL_per_day'],
-            mode='lines',
-            name='Oil Rate (stbd)(bbl/d)',
-            line=dict(color='green', width=1.5),
-            hovertemplate='Oil Rate: %{y:.2f} bbl/d<extra></extra>',
-        ))
-    if(water):
-        fig.add_trace(go.Scatter(
-            x=filtered_df['MDATE'],
-            y=filtered_df['WATER_per_day'],
-            mode='lines',
-            name='Water Rate (stbd)(bbl/d)',
-            line=dict(color='blue', width=1.5),
-            hovertemplate='Water Rate: %{y:.2f} bbl/d<extra></extra>',
-        ))
-    if(gas):
-        fig.add_trace(go.Scatter(
-            x=filtered_df['MDATE'],
-            y=filtered_df['GAS_per_day'],
-            mode='lines',
-            name='Gas Rate (mmscfd)(cf/d)',
-            line=dict(color='red', width=1.5),
-            yaxis='y2',
-            hovertemplate='Gas Rate: %{y:.2f} mmscfd<extra></extra>',
-        ))
-
-    fig.update_layout(
-        xaxis=dict(title='Year'),
-        yaxis=dict(title=y_axis_type + ' rate', type=y_axis_type),
-        yaxis2=dict(title=y_axis_type + ' rate', overlaying='y', side='right', type=y_axis_type),
-        legend=dict(
-            orientation='h', 
-            x=0.5, 
-            xanchor='center', 
-            y=1.1,
-            visible=show_legend
-        ),
-        hovermode='x unified',
-        template='simple_white',
-        margin=dict(l=40, r=40, t=50, b=50),
+def callback(app):
+    @app.callback(
+        Output('combined-graph', 'children'),
+        [
+        Input('dropdown-well', 'value'),
+        Input('dropdown-scale', 'value'),
+        Input('legend-status', 'value'),
+        Input('figure-checklist', 'value'),
+        ],
     )
+    def update_graph(selected_well, y_axis_type, legend_status, plot_type):
+        show_legend = 'on' in legend_status
+        gas = 'Gas' in plot_type
+        water = 'Water' in plot_type
+        oil = 'Oil' in plot_type
 
-    return fig
+        filtered_df = df[df['Universal'] == selected_well]
+
+        fig = go.Figure()
+
+        if(oil):
+            fig.add_trace(go.Scatter(
+                x=filtered_df['MDATE'],
+                y=filtered_df['OIL_per_day'],
+                mode='lines',
+                name='Oil Rate (stbd)(bbl/d)',
+                line=dict(color='green', width=1.5),
+                hovertemplate='Oil Rate: %{y:.2f} bbl/d<extra></extra>',
+            ))
+        if(water):
+            fig.add_trace(go.Scatter(
+                x=filtered_df['MDATE'],
+                y=filtered_df['WATER_per_day'],
+                mode='lines',
+                name='Water Rate (stbd)(bbl/d)',
+                line=dict(color='blue', width=1.5),
+                hovertemplate='Water Rate: %{y:.2f} bbl/d<extra></extra>',
+            ))
+        if(gas):
+            fig.add_trace(go.Scatter(
+                x=filtered_df['MDATE'],
+                y=filtered_df['GAS_per_day'],
+                mode='lines',
+                name='Gas Rate (mmscfd)(cf/d)',
+                line=dict(color='red', width=1.5),
+                yaxis='y2',
+                hovertemplate='Gas Rate: %{y:.2f} mmscfd<extra></extra>',
+            ))
+
+        fig.update_layout(
+            xaxis=dict(title='Year'),
+            yaxis=dict(title=y_axis_type + ' rate', type=y_axis_type),
+            yaxis2=dict(title=y_axis_type + ' rate', overlaying='y', side='right', type=y_axis_type),
+            legend=dict(
+                orientation='h', 
+                x=0.5, 
+                xanchor='center', 
+                y=1.1,
+                visible=show_legend
+            ),
+            hovermode='x unified',
+            template='simple_white',
+            margin=dict(l=40, r=40, t=50, b=50),
+        )
+
+        
+        return dcc.Graph(figure=fig)
+
+callback(app)
 
 if __name__ == '__main__':
     if os.environ.get("WERKZEUG_RUN_MAIN") == "true":

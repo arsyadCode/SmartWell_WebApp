@@ -142,6 +142,21 @@ app.layout = html.Div([
             ),
             html.Div(style={'display': 'flex', 'gap': 28, 'paddingTop': '17px'}, children=[
                 html.Div(style={'display': 'flex', 'flexDirection': 'column', 'gap': '10px'}, children=[
+                    html.Div(className='feature-container', style={'border': '1px solid #3F849B', 'padding': '0', 'borderRadius': '16px', 'width': '174px', 'height': '130px'}, children=[
+                        html.H1('Rate Scale', className='Feature-title', style={'color': 'white', 'fontWeight': '700', 'fontSize': '16px', 'padding': '8px 17px', 'backgroundColor': '#3F849B', 'borderRadius': '10px'}),
+                        html.Div(style={'padding': '10px 25px'}, children=[
+                            dcc.RadioItems(
+                                id="dropdown-scale",
+                                options=[
+                                    {'label': 'Linear', 'value': 'linear', 'disabled': True},
+                                    {'label': 'Logarithmic', 'value': 'log', 'disabled': True},
+                                ],
+                                value='linear', 
+                                labelStyle={'display': 'flex', 'marginBottom': '9.5px', 'gap': '15px', 'alignItems': 'center', 'fontWeight': '400', 'fontSize': '14px', 'color': '#616161'},
+                                inputStyle={'transform': 'scale(1.5)', 'borderRadius': '6px'}
+                            ),
+                        ])
+                    ]),
                     html.Div(className='feature-container', style={'border': '1px solid #3F849B', 'padding': '0', 'borderRadius': '16px', 'width': '174px', 'height': '93px'}, children=[
                         html.H1('Legend', className='Feature-title', style={'color': 'white', 'fontWeight': '700', 'fontSize': '16px', 'padding': '8px 17px', 'backgroundColor': '#3F849B', 'borderRadius': '10px'}),
                         html.Div(style={'padding': '10px 25px'}, children=[
@@ -178,9 +193,9 @@ app.layout = html.Div([
                         html.H1('Plot Area', className='Feature-title', style={'color': 'white', 'fontWeight': '700', 'fontSize': '16px', 'padding': '8px 17px', 'backgroundColor': '#3F849B', 'borderRadius': '10px'}),
                         html.Div(style={'padding': '10px 25px'}, children=[
                             dcc.RadioItems(
-                                id="",
+                                id="plot-type",
                                 options=[
-                                    {'label': 'Single Plot', 'value': 'single', 'disabled': True},
+                                    {'label': 'Single Plot', 'value': 'single'},
                                     {'label': 'Multi Plot', 'value': 'multi'},
                                 ],
                                 value='multi', 
@@ -209,7 +224,7 @@ app.layout = html.Div([
                             html.Div(style={'fontWeight': '400', 'fontSize': '14px', 'color': '#616161', 'display': 'none'}, children=[
                                 html.Label('Select Well:', style={'fontWeight': '400', 'fontSize': '14px', 'color': '#616161'}),
                                 dcc.Dropdown(
-                                    id='well-dropdown', 
+                                    id='dropdown-well', 
                                     options=[{'label': well, 'value': well} for well in dropdown_options],
                                     value=dropdown_options[0],
                                     clearable=False,
@@ -254,7 +269,7 @@ def update_detail_checkboxes(sub_checked):
     return style
 
 @app.callback(
-    Output('well-dropdown', 'value'),
+    Output('dropdown-well', 'value'),
     Input('tab-container', 'value'),
 )
 def showData(tab_container):
@@ -310,62 +325,65 @@ def create_figure(x, y, x2, y2, ylabel, color, show_legend):
 
     return fig
 
-# Callback to update figures
-@app.callback(
-    Output("graphs-container", "children"),
-    [Input("well-dropdown", "value"),
-     Input("figures-checklist", "value")],
-     Input('legend-status', 'value'),
-)
-def update_graphs(selected_well, selected_figures, legend_status):
-    show_legend = 'on' in legend_status
-    selected_data = df[df['Universal'] == selected_well]
-    selected_data2 = df2[df2['Universal'] == selected_well]
-    plot_data = dfPlot[dfPlot['Universal'] == selected_well]
+def callbacks(app):
+    # Callback to update figures
+    @app.callback(
+        Output("graphs-container", "children"),
+        [Input("dropdown-well", "value"),
+        Input("figures-checklist", "value")],
+        Input('legend-status', 'value'),
+    )
+    def update_graphs(selected_well, selected_figures, legend_status):
+        show_legend = 'on' in legend_status
+        selected_data = df[df['Universal'] == selected_well]
+        selected_data2 = df2[df2['Universal'] == selected_well]
+        plot_data = dfPlot[dfPlot['Universal'] == selected_well]
 
-    figures = []
+        figures = []
 
-    if "Oil Rate" in selected_figures:
-        fig = create_figure(
-            selected_data['MDATE'], selected_data['OIL_per_day'],
-            plot_data['DATE_STAMP'], plot_data['CORR_OIL_RATE_STBD'],
-            "Oil Rate (bbl/d)", "darkgoldenrod", show_legend
-        )
-        figures.append(dcc.Graph(figure=fig))
+        if "Oil Rate" in selected_figures:
+            fig = create_figure(
+                selected_data['MDATE'], selected_data['OIL_per_day'],
+                plot_data['DATE_STAMP'], plot_data['CORR_OIL_RATE_STBD'],
+                "Oil Rate (bbl/d)", "darkgoldenrod", show_legend
+            )
+            figures.append(dcc.Graph(figure=fig))
 
-    if "Water Rate" in selected_figures:
-        fig = create_figure(
-            selected_data['MDATE'], selected_data['WATER_per_day'],
-            plot_data['DATE_STAMP'], plot_data['CORR_WTR_RATE_STBD'],
-            "Water Rate (bbl/d)", "dodgerblue", show_legend
-        )
-        figures.append(dcc.Graph(figure=fig))
+        if "Water Rate" in selected_figures:
+            fig = create_figure(
+                selected_data['MDATE'], selected_data['WATER_per_day'],
+                plot_data['DATE_STAMP'], plot_data['CORR_WTR_RATE_STBD'],
+                "Water Rate (bbl/d)", "dodgerblue", show_legend
+            )
+            figures.append(dcc.Graph(figure=fig))
 
-    if "Gas Rate" in selected_figures:
-        fig = create_figure(
-            selected_data['MDATE'], selected_data['GAS_per_day'],
-            plot_data['DATE_STAMP'], plot_data['CORR_GAS_RES_RATE_MMSCFD'],
-            "Gas Rate (mmscfd)", "darkturquoise", show_legend
-        )
-        figures.append(dcc.Graph(figure=fig))
+        if "Gas Rate" in selected_figures:
+            fig = create_figure(
+                selected_data['MDATE'], selected_data['GAS_per_day'],
+                plot_data['DATE_STAMP'], plot_data['CORR_GAS_RES_RATE_MMSCFD'],
+                "Gas Rate (mmscfd)", "darkturquoise", show_legend
+            )
+            figures.append(dcc.Graph(figure=fig))
 
-    if "WHP Rate" in selected_figures:
-        fig = create_figure(
-            selected_data2['START_TIME'], selected_data2['WHP'],
-            plot_data['DATE_STAMP'], plot_data['WHP_BARG'],
-            "WHP Rate (barg)", "darkslateblue", show_legend
-        )
-        figures.append(dcc.Graph(figure=fig))
+        if "WHP Rate" in selected_figures:
+            fig = create_figure(
+                selected_data2['START_TIME'], selected_data2['WHP'],
+                plot_data['DATE_STAMP'], plot_data['WHP_BARG'],
+                "WHP Rate (barg)", "darkslateblue", show_legend
+            )
+            figures.append(dcc.Graph(figure=fig))
 
-    if "WHT Rate" in selected_figures:
-        fig = create_figure(
-            selected_data2['START_TIME'], selected_data2['WHT'],
-            plot_data['DATE_STAMP'], plot_data['WHT_DEG_C'],
-            "WHT Rate (°C)", "darkslateblue", show_legend
-        )
-        figures.append(dcc.Graph(figure=fig))
+        if "WHT Rate" in selected_figures:
+            fig = create_figure(
+                selected_data2['START_TIME'], selected_data2['WHT'],
+                plot_data['DATE_STAMP'], plot_data['WHT_DEG_C'],
+                "WHT Rate (°C)", "darkslateblue", show_legend
+            )
+            figures.append(dcc.Graph(figure=fig))
 
-    return figures
+        return figures
+
+callbacks(app)
 
 # Run Dash app
 if __name__ == '__main__':
