@@ -29,6 +29,36 @@ app.layout = html.Div(style={'padding': 0, 'margin': 0}, children=[
 RunHistoris.callback(app)
 RunAll_5PlotsData.callbacks(app)
 
+def save_file(contents, filename):
+    content_type, content_string = contents.split(',')
+    decoded = base64.b64decode(content_string)
+    
+    file_path = os.path.join(excel_file)
+    with open(file_path, "wb") as f:
+        f.write(decoded)
+
+@app.callback(
+    Output("upload-modal", "style"),
+    Output("page-reloader", 'href'),
+    Input("open-upload-button", "n_clicks"), 
+    Input("close-upload-button", "n_clicks"),
+    Input('file-upload', 'contents'),
+    State('file-upload', 'filename')
+)
+def toggle_upload_modal(open_clicks, close_clicks, contents, filename):
+    default_style = {
+        'lineHeight': '60px',
+        'borderWidth': '1px', 'borderStyle': 'dashed',
+        'borderRadius': '5px', 'textAlign': 'center', 'zIndex': 999, 'backgroundColor': "rgba(0,0,0,0,0.5)",
+        'position': 'absolute', 'top': 0, 'bottom': 0, 'left': 0, 'right': 0, 'alignItems': 'center', 'justifyContent': 'center'
+    }
+    if contents is not None:
+        save_file(contents, filename)
+        return {**default_style, 'display': 'none'}, "/"
+    if open_clicks > close_clicks:
+        return {**default_style, 'display': 'flex'}, None
+    return {**default_style, 'display': 'none'}, None
+
 @app.callback(
     Output('page-content', 'children'),
     Input('plot-type', 'value')
