@@ -6,11 +6,11 @@ import dash_bootstrap_components as dbc
 from dash.dependencies import ALL
 
 # Initialize Dash app
-app = dash.Dash(__name__, external_stylesheets=[dbc.themes.BOOTSTRAP], title="Smart Well Monitoring", suppress_callback_exceptions=True)
-server = app.server
+app = dash.Dash(__name__, external_stylesheets=[dbc.themes.BOOTSTRAP], title="Smart Well Monitoring")
+UPLOAD_DIRECTORY = os.path.join(os.path.dirname(__file__), '../Data')
 
 # Load data from Excel file with multiple sheets
-excel_file = pd.ExcelFile("Data/historicalData.xlsx")
+excel_file = pd.ExcelFile("./Data/show_historicalData.xlsx")
 df = pd.read_excel(excel_file, sheet_name="monthly_rate_per_day_combined")
 df2 = pd.read_excel(excel_file, sheet_name="pi_sensor_per_month")
 dfPlot = pd.read_excel(excel_file, sheet_name="plot_data")

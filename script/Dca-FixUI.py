@@ -13,7 +13,7 @@ import tempfile
 app = dash.Dash(__name__, external_stylesheets=[dbc.themes.BOOTSTRAP])
 app.title = 'DCA'
 UPLOAD_DIRECTORY = os.path.join(os.path.dirname(__file__), '../Data')
-excel_file = './Data/show_data.xlsx'
+excel_file = './Data/show_DCAdata.xlsx'
 xls = pd.ExcelFile(excel_file)
 sheet_names = xls.sheet_names
 
