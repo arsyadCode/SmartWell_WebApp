@@ -9,7 +9,7 @@ import pandas as pd
 app = dash.Dash(__name__, external_stylesheets=[dbc.themes.BOOTSTRAP], title="Smart Well Monitoring", suppress_callback_exceptions=True)
 server = app.server
 
-excel_file = pd.ExcelFile("Data/historicalData.xlsx")
+excel_file = pd.ExcelFile("./Data/show_historicalData.xlsx")
 df = pd.read_excel(excel_file, sheet_name="monthly_rate_per_day_combined")
 df2 = pd.read_excel(excel_file, sheet_name="pi_sensor_per_month")
 dfPlot = pd.read_excel(excel_file, sheet_name="plot_data")

@@ -5,7 +5,7 @@ import plotly.graph_objects as go
 import dash_bootstrap_components as dbc
 import base64
 
-excel_file = pd.ExcelFile("Data/historicalData.xlsx")
+excel_file = pd.ExcelFile("./Data/show_historicalData.xlsx")
 df = pd.read_excel(excel_file, sheet_name="monthly_rate_per_day_combined")
 df['MDATE'] = pd.to_datetime(df['MDATE'], format='%m/%d/%Y')
 
