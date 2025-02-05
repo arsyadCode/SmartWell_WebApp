@@ -290,18 +290,18 @@ app.layout = html.Div([
                                     {"name": "Start Date", "id": "Start Date"},
                                     {"name": "End Date", "id": "End Date"},
                                     {"name": "Start Forecast Date", "id": "Start Forecast Date"},
-                                    {"name": "Cut Off Date", "id": "Cut Off Date"},
+                                    {"name": "Cum Date", "id": "Cum Date"},
+                                    {"name": "Cum Prod", "id": "Cum Prod"},
                                     {"name": "Reserves (bbl)", "id": "Reserves (bbl)"},
-                                    {"name": "Rate Intervention (bopd)", "id": "Rate Intervention (bopd)"},
                                     {"name": "b", "id": "b"},
                                     {"name": "Di", "id": "Di"},
                                     {"name": "qi", "id": "qi"},
                                     {"name": "ti", "id": "ti"},
                                     {"name": "te", "id": "te"},
                                     {"name": "Final Rate", "id": "Final Rate"},
-                                    {"name": "Cum Date", "id": "Cum Date"},
-                                    {"name": "Cum Prod", "id": "Cum Prod"},
-                                    {"name": "EUR", "id": "EUR"}
+                                    {"name": "EUR", "id": "EUR"},
+                                    {"name": "Rate Intervention (bopd)", "id": "Rate Intervention (bopd)"},
+                                    {"name": "Cut Off Date", "id": "Cut Off Date"}
                                 ],
                                 data=table_data.to_dict("records"),
                                 editable=False,
@@ -566,7 +566,9 @@ def update_plots(well_name, foil_date, months_end_date, slider_value, rate_inter
     else:
         oil_fig = px.line(title=f'Oil Rate Comparison of Decline Models Well {well_name}')
 
-    oil_fig.update_layout(title={
+    oil_fig.update_layout(
+        height=600,
+        title={
             "text": f"<b>Oil Rate Comparison of Decline Models Well {well_name}</b>",
             "x": 0.5, "xanchor": "center"},
         showlegend=show_legend)
@@ -640,9 +642,9 @@ def update_plots(well_name, foil_date, months_end_date, slider_value, rate_inter
     oil_fig.update_traces(
         customdata=df_combined[['INDEX']].values,
         hovertemplate=(
-            "<b>Date: %{x}</b><br>" +
-            "<b>Oil Rate: %{y:,.2f} bopd</b><br>" +
-            "<b>Index: %{customdata[0]}</b><br>" +
+            "Date: %{x}<br>" +
+            "Oil Rate: %{y:,.2f} bopd<br>" +
+            "Index: %{customdata[0]}<br>" +
             "<extra></extra>"
         )
     )
@@ -652,18 +654,18 @@ def update_plots(well_name, foil_date, months_end_date, slider_value, rate_inter
         "Start Date": start_date.strftime('%d-%m-%Y'),
         "End Date": end_dates.strftime('%d-%m-%Y'),
         "Start Forecast Date": foil_date.strftime('%d-%m-%Y'),
-        "Cut Off Date": crossing_date.strftime('%d-%m-%Y') if not crossed.empty else "N/A",
+        "Cum Date": end_dates.strftime('%d-%m-%Y'),
+        "Cum Prod": f"{val_cum_prod:,.3f} bbl",
         "Reserves (bbl)": f"{val_reserves:,.5f}",
-        "Rate Intervention (bopd)": rate_intervention,
         "b": f"{b_value:.3f}",
         "Di": f"{val_di:.7f} M.n.",
         "qi": f"{qi:.3f} bopd",
         "ti": foil_date.strftime('%d-%m-%Y'),
         "te": end_date.strftime('%d-%m-%Y'),
         "Final Rate": f"{val_final_rate:,.4f} bopd",
-        "Cum Date": end_dates.strftime('%d-%m-%Y'),
-        "Cum Prod": f"{val_cum_prod:,.3f} bbl",
-        "EUR": f"{val_eur:,.2f}"
+        "EUR": f"{val_eur:,.2f}",
+        "Rate Intervention (bopd)": rate_intervention,
+        "Cut Off Date": crossing_date.strftime('%d-%m-%Y') if not crossed.empty else "N/A"
     }
 
 
