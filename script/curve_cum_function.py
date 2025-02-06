@@ -11,9 +11,11 @@ def harmonic_rate(qi, di, t):
 
 # Function for hyperbolic decline curve
 def hyperbolic_rate(qi, di, b, t):
+    b = 0.9999 if b == 1 else 0.0001 if b == 0 else b
     return qi / ((1 + b * di * t)**(1/b))
 
 def hyperbolic_decline_rate(qi, qfinal, b, series_time):
+    b = 0.9999 if b == 1 else 0.0001 if b == 0 else b
     return (((qi / qfinal)**b)-1) / (b * series_time.iloc[-1])
 
 # Function for Cumulative Production
@@ -21,6 +23,7 @@ def cum_exponential(initial_rate, di_exponential, rate_now):
     return (initial_rate - rate_now) / di_exponential
 
 def cum_hyperbolic(initial_rate, di_hyperbolic, rate_now, b):
+    b = 0.9999 if b == 1 else 0.0001 if b == 0 else b
     return (initial_rate/(di_hyperbolic*(1-b)))*(1-(rate_now/initial_rate)**(1-b))
 
 def cum_harmonic(initial_rate, di_harmonic, rate_now):
@@ -36,7 +39,7 @@ def gas_r_squared_error(df_range, rate_series):
     SSE = np.sum(((df_range['CORR_GAS_RES_RATE_MMSCFD'] - rate_series)**2))
     return 1 - SSE / SST
 
-def process_data(input_data, sheet_name, initial_date, final_date, rate_column, rate_type):
+def process_data(input_data, sheet_name, initial_date, final_date, qi_change, di_change, rate_column, rate_type):
     """
     Process decline curve data from either Excel file or DataFrame
     
@@ -77,13 +80,15 @@ def process_data(input_data, sheet_name, initial_date, final_date, rate_column, 
         error_values[b] = oil_r_squared_error(df_filtered, model) if rate_type == 'oil' else gas_r_squared_error(df_filtered, model)
 
     best_b = min(error_values, key=lambda x: abs(error_values[x] - 1))
+    di_change /= 1000000
 
     # Calculate decline rates
-    exp_di = np.sum(df_filtered['TIME'] * (np.log(initial_rate/df_filtered[rate_column])))/(np.sum(df_filtered['TIME']**2))
-    har_di = (np.sum(df_filtered['TIME'] * initial_rate / df_filtered[rate_column]) - np.sum(df_filtered['TIME'])) / np.sum(df_filtered['TIME']**2)
-    hyper_di = hyperbolic_decline_rate(initial_rate, final_rate, best_b, df_filtered['TIME'])
+    exp_di = di_change + np.sum(df_filtered['TIME'] * (np.log(initial_rate/df_filtered[rate_column])))/(np.sum(df_filtered['TIME']**2))
+    har_di = di_change + (np.sum(df_filtered['TIME'] * initial_rate / df_filtered[rate_column]) - np.sum(df_filtered['TIME'])) / np.sum(df_filtered['TIME']**2)
+    hyper_di = di_change + hyperbolic_decline_rate(initial_rate, final_rate, best_b, df_filtered['TIME'])
 
     # Calculate models
+    initial_rate += qi_change
     exp_model = exponential_rate(initial_rate, exp_di, df_filtered['TIME'])
     har_model = harmonic_rate(initial_rate, har_di, df_filtered['TIME'])
     hyper_model = hyperbolic_rate(initial_rate, hyper_di, best_b, df_filtered['TIME'])

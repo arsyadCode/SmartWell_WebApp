@@ -7,7 +7,7 @@ import plotly.express as px
 import curve_cum_function as ccf
 from dash import dcc, html, dash_table, callback_context
 from dash.dependencies import Input, Output, State, ALL
-from datetime import datetime
+from datetime import date
 import tempfile
 
 app = dash.Dash(__name__, external_stylesheets=[dbc.themes.BOOTSTRAP])
@@ -42,7 +42,7 @@ def create_nested_checkboxes(structure):
                 value=[main],
                 id={'type': 'main-checkbox', 'name': f'checkbox-{main}'},
                 inline=True,
-                labelStyle={'display': 'flex', 'marginBottom': '19px', 'gap': '15px', 'alignItems': 'center', 'fontWeight': '400', 'fontSize': '14px', 'color': '#616161'},
+                labelStyle={'display': 'flex', 'marginBottom': '19px', 'gap': '15px', 'alignItems': 'center', 'fontWeight': '400', 'fontSize': '18px', 'color': '#616161'},
                 inputStyle={'transform': 'scale(1.5)', 'borderRadius': '6px'}
             )
         ], style={'marginLeft': '8px'})
@@ -54,7 +54,7 @@ def create_nested_checkboxes(structure):
                 id={'type': 'sub-checkbox', 'name': f'checkbox-{main}-{sub}'},
                 value=[sub] if 'Platform L' == sub else [],
                 inline=True,
-                labelStyle={'display': 'flex', 'marginBottom': '19px', 'gap': '15px', 'alignItems': 'center', 'fontWeight': '400', 'fontSize': '14px', 'color': '#616161'},
+                labelStyle={'display': 'flex', 'marginBottom': '19px', 'gap': '15px', 'alignItems': 'center', 'fontWeight': '400', 'fontSize': '16px', 'color': '#616161'},
                 inputStyle={'transform': 'scale(1.5)', 'borderRadius': '6px'}
             )
 
@@ -64,7 +64,7 @@ def create_nested_checkboxes(structure):
                 id={'type':'detail-checkbox', 'name': f'checkbox-{main}-{sub}-details'},
                 value=['B-L-18'] if 'B-L-18' in details else [],
                 inline=True,
-                labelStyle={'display': 'flex', 'marginBottom': '19px', 'gap': '15px', 'alignItems': 'center', 'fontWeight': '400', 'fontSize': '14px', 'color': '#616161'},
+                labelStyle={'display': 'flex', 'marginBottom': '19px', 'gap': '15px', 'alignItems': 'center', 'fontWeight': '400', 'fontSize': '16px', 'color': '#616161'},
                 inputStyle={'transform': 'scale(1.5)', 'borderRadius': '6px'}
             )
             
@@ -138,8 +138,8 @@ app.layout = html.Div([
             ),
             html.Div(style={'display': 'flex', 'gap': 28, 'paddingTop': '17px'}, children=[
                 html.Div(style={'display': 'flex', 'flexDirection': 'column', 'gap': '10px'}, children=[
-                    html.Div(className='feature-container', style={'border': '1px solid #3F849B', 'padding': '0', 'borderRadius': '16px', 'width': '174px', 'height': '123px'}, children=[
-                        html.H1('Plot Type', className='Feature-title', style={'color': 'white', 'fontWeight': '700', 'fontSize': '16px', 'padding': '8px 17px', 'backgroundColor': '#3F849B', 'borderRadius': '10px'}),
+                    html.Div(className='feature-container', style={'border': '1px solid #3F849B', 'padding': '0', 'borderRadius': '16px', 'width': '180px', 'height': '123px'}, children=[
+                        html.H1('Plot Type', className='Feature-title', style={'color': 'white', 'fontWeight': '700', 'fontSize': '18px', 'padding': '8px 17px', 'backgroundColor': '#3F849B', 'borderRadius': '10px'}),
                         html.Div(style={'padding': '10px 25px'}, children=[
                             dcc.Checklist(
                                 id='plot-type',
@@ -148,13 +148,13 @@ app.layout = html.Div([
                                     {'label': 'Line', 'value': 'line'},
                                 ],
                                 value=['scatter', 'line'], 
-                                labelStyle={'display': 'flex', 'marginBottom': '9.5px', 'gap': '15px', 'alignItems': 'center', 'fontWeight': '400', 'fontSize': '14px', 'color': '#616161'},
+                                labelStyle={'display': 'flex', 'marginBottom': '6px', 'gap': '15px', 'alignItems': 'center', 'fontWeight': '400', 'fontSize': '16px', 'color': '#616161'},
                                 inputStyle={'transform': 'scale(1.5)', 'borderRadius': '6px'}
                             ),
                         ])
                     ]),
-                    html.Div(className='feature-container', style={'border': '1px solid #3F849B', 'padding': '0', 'borderRadius': '16px', 'width': '174px', 'height': '93px'}, children=[
-                        html.H1('Legend', className='Feature-title', style={'color': 'white', 'fontWeight': '700', 'fontSize': '16px', 'padding': '8px 17px', 'backgroundColor': '#3F849B', 'borderRadius': '10px'}),
+                    html.Div(className='feature-container', style={'border': '1px solid #3F849B', 'padding': '0', 'borderRadius': '16px', 'width': '180px', 'height': '93px'}, children=[
+                        html.H1('Legend', className='Feature-title', style={'color': 'white', 'fontWeight': '700', 'fontSize': '18px', 'padding': '8px 17px', 'backgroundColor': '#3F849B', 'borderRadius': '10px'}),
                         html.Div(style={'padding': '10px 25px'}, children=[
                             dcc.Checklist(
                                 id='legend-status',
@@ -162,13 +162,13 @@ app.layout = html.Div([
                                     {'label': 'Enable', 'value': 'on'},
                                 ],
                                 value=['on'], 
-                                labelStyle={'display': 'flex', 'marginBottom': '9.5px', 'gap': '15px', 'alignItems': 'center', 'fontWeight': '400', 'fontSize': '14px', 'color': '#616161'},
+                                labelStyle={'display': 'flex', 'marginBottom': '6px', 'gap': '15px', 'alignItems': 'center', 'fontWeight': '400', 'fontSize': '16px', 'color': '#616161'},
                                 inputStyle={'transform': 'scale(1.5)', 'borderRadius': '6px'}
                             ),
                         ])
                     ]),
-                    html.Div(className='feature-container', style={'border': '1px solid #3F849B', 'padding': '0', 'borderRadius': '16px', 'width': '174px', 'height': '153px'}, children=[
-                        html.H1('Models', className='Feature-title', style={'color': 'white', 'fontWeight': '700', 'fontSize': '16px', 'padding': '8px 17px', 'backgroundColor': '#3F849B', 'borderRadius': '10px'}),
+                    html.Div(className='feature-container', style={'border': '1px solid #3F849B', 'padding': '0', 'borderRadius': '16px', 'width': '180px', 'height': '153px'}, children=[
+                        html.H1('Models', className='Feature-title', style={'color': 'white', 'fontWeight': '700', 'fontSize': '18px', 'padding': '8px 17px', 'backgroundColor': '#3F849B', 'borderRadius': '10px'}),
                         html.Div(style={'padding': '10px 25px'}, children=[
                             dcc.RadioItems(
                                 id="selected-b-options",
@@ -178,51 +178,51 @@ app.layout = html.Div([
                                     {'label': 'Harmonic', 'value': 1},
                                 ],
                                 value=selected_b_value, 
-                                labelStyle={'display': 'flex', 'marginBottom': '9.5px', 'gap': '15px', 'alignItems': 'center', 'fontWeight': '400', 'fontSize': '14px', 'color': '#616161'},
+                                labelStyle={'display': 'flex', 'marginBottom': '6px', 'gap': '15px', 'alignItems': 'center', 'fontWeight': '400', 'fontSize': '16px', 'color': '#616161'},
                                 inputStyle={'transform': 'scale(1.5)', 'borderRadius': '6px'}
                             ),
                         ])
                     ]),
-                    html.Div(className='feature-container', style={'border': '1px solid #3F849B', 'padding': '0', 'borderRadius': '16px', 'width': '174px', 'minHeight': '123px'}, children=[
-                        html.H1('Settings', className='Feature-title', style={'color': 'white', 'fontWeight': '700', 'fontSize': '16px', 'padding': '8px 17px', 'backgroundColor': '#3F849B', 'borderRadius': '10px'}),
+                    html.Div(className='feature-container', style={'border': '1px solid #3F849B', 'padding': '0', 'borderRadius': '16px', 'width': '180px', 'minHeight': '123px'}, children=[
+                        html.H1('Settings', className='Feature-title', style={'color': 'white', 'fontWeight': '700', 'fontSize': '18px', 'padding': '8px 17px', 'backgroundColor': '#3F849B', 'borderRadius': '10px'}),
                         html.Div(style={'padding': '10px', 'display': 'flex', 'flexDirection': 'column', 'gap': '10px'}, children=[
                             html.Div(style={'width': '100%'}, children=[
-                                html.Label('Start Forecast Date:', style={'fontWeight': '400', 'fontSize': '14px', 'color': '#616161'}),
+                                html.Label('Start Forecast Date:', style={'fontWeight': '400', 'fontSize': '16px', 'color': '#616161'}),
                                 dcc.DatePickerSingle(
                                     id='foil-date-picker',
-                                    date=datetime(2024, 4, 1),
+                                    date=date(2024, 4, 1),
                                     display_format='DD/MM/YYYY', 
-                                    style={ 'border': '1px solid #616161', 'borderRadius': '6px', 'width': '134px', 'height': '30px', 'color': 'black', 'overflow': 'hidden', 'display': 'flex', 'alignItems': 'center' },
+                                    # style={ 'border': '1px solid #616161', 'borderRadius': '6px', 'width': '145px', 'height': '30px', 'color': 'black', 'overflow': 'hidden', 'display': 'flex', 'alignItems': 'center' },
                                 )
                             ]),
-                            html.Div(style={'fontWeight': '400', 'fontSize': '14px', 'color': '#616161'}, children=[
-                                html.Label('Forecast Months:', style={'fontWeight': '400', 'fontSize': '14px', 'color': '#616161'}),
+                            html.Div(style={'fontWeight': '400', 'fontSize': '16px', 'color': '#616161'}, children=[
+                                html.Label('Forecast Months:', style={'fontWeight': '400', 'fontSize': '16px', 'color': '#616161'}),
                                 dcc.Input(
                                     id='months-end-date', 
                                     type='number', 
                                     value=120, 
                                     min=1, 
-                                    style={'border': '1px solid #616161', 'borderRadius': '6px', 'width': '134px', 'height': '30px', 'color': 'black', 'overflow': 'hidden', 'display': 'flex', 'alignItems': 'center'}
+                                    style={'border': '1px solid #616161', 'borderRadius': '6px', 'width': '145px', 'height': '30px', 'color': 'black', 'overflow': 'hidden', 'display': 'flex', 'alignItems': 'center'}
                                 )
                             ]),
-                            html.Div(style={'fontWeight': '400', 'fontSize': '14px', 'color': '#616161'}, children=[
-                                html.Label('Rate Intervention (bopd):', style={'fontWeight': '400', 'fontSize': '14px', 'color': '#616161'}),
-                                dcc.Input(
-                                    id='oil-rate-intervention', 
-                                    type='number', 
-                                    value=0, 
-                                    step=50, 
-                                    style={'border': '1px solid #616161', 'borderRadius': '6px', 'width': '134px', 'height': '30px', 'color': 'black', 'overflow': 'hidden', 'display': 'flex', 'alignItems': 'center'}
-                                )
-                            ]),
-                            html.Div(style={'fontWeight': '400', 'fontSize': '14px', 'color': '#616161'}, children=[
-                                html.Label('Rate Limit Value (bopd):', style={'fontWeight': '400', 'fontSize': '14px', 'color': '#616161'}),
+                            # html.Div(style={'fontWeight': '400', 'fontSize': '14px', 'color': '#616161'}, children=[
+                            #     html.Label('Rate Intervention (bopd):', style={'fontWeight': '400', 'fontSize': '14px', 'color': '#616161'}),
+                            #     dcc.Input(
+                            #         id='oil-rate-intervention', 
+                            #         type='number', 
+                            #         value=0, 
+                            #         step=50, 
+                            #         style={'border': '1px solid #616161', 'borderRadius': '6px', 'width': '134px', 'height': '30px', 'color': 'black', 'overflow': 'hidden', 'display': 'flex', 'alignItems': 'center'}
+                            #     )
+                            # ]),
+                            html.Div(style={'fontWeight': '400', 'fontSize': '16px', 'color': '#616161'}, children=[
+                                html.Label('Rate Limit Value (bopd):', style={'fontWeight': '400', 'fontSize': '16px', 'color': '#616161'}),
                                 dcc.Input(
                                     id='limit-value', 
                                     type='number', 
                                     value=0.0, 
                                     step=0.1, 
-                                    style={'border': '1px solid #616161', 'borderRadius': '6px', 'width': '134px', 'height': '30px', 'color': 'black', 'overflow': 'hidden', 'display': 'flex', 'alignItems': 'center'}
+                                    style={'border': '1px solid #616161', 'borderRadius': '6px', 'width': '150px', 'height': '30px', 'color': 'black', 'overflow': 'hidden', 'display': 'flex', 'alignItems': 'center'}
                                 )
                             ]),
                         ])
@@ -245,7 +245,12 @@ app.layout = html.Div([
                         },
                         children=[
                             dbc.Row([
-                                dbc.Col(dcc.Graph(id='oil-plot'), width=12),
+                                dbc.Col(dcc.Loading(
+                                    id="loading-oil-plot",
+                                    type="dot",
+                                    children=[dcc.Graph(id='oil-plot')],
+                                    style={'position': 'relative'}, overlay_style={"visibility":"visible", "opacity": .5, "backgroundColor": "white"} 
+                                ),),
                             ]),
                             dbc.Row([
                                 dbc.Col(html.Div(id='reserves-output'), width=12),
@@ -262,7 +267,7 @@ app.layout = html.Div([
                                         marks={},
                                         tooltip={"placement": "bottom", "always_visible": True}
                                     )
-                                ], width=12),
+                                ], width=12, style={'marginBottom': '30px'}), 
                             ]),
                             dbc.Row([
                                 dbc.Col([
@@ -276,8 +281,46 @@ app.layout = html.Div([
                                         marks={0: '0.000', 0.5: '0.500', 1: '1.000'},
                                         tooltip={"placement": "bottom", "always_visible": True}
                                     )
-                                ], width=4),
-                            ], style={'marginTop': '10px'}),  # Menambahkan margin agar tidak terlalu dekat dengan Date Range Slider
+                                ], width=6, style={'paddingRight': '15px'}),
+                                dbc.Col([
+                                    html.Label('Adjust Rate Intervention (bopd):'),
+                                    dcc.Slider(
+                                        id='oil-rate-intervention',
+                                        min=0,
+                                        max=1000,
+                                        step=1,
+                                        value=0,
+                                        marks={0: '0', 250: '250', 500: '500', 750: '750', 1000: '1000'},
+                                        tooltip={"placement": "bottom", "always_visible": True}
+                                    )
+                                ], width=6, style={'paddingRight': '15px'}),
+                            ], style={'marginBottom': '30px'}),
+                            dbc.Row([
+                                dbc.Col([
+                                    html.Label('Adjust Qi Value Changes:'),
+                                    dcc.Slider(
+                                        id='qi-value-slider',
+                                        min=-500,
+                                        max=500,
+                                        step=1,
+                                        value=0,
+                                        marks={-500: '-500', 0: '0', 500: '500'},
+                                        tooltip={"placement": "bottom", "always_visible": True}
+                                    )
+                                ], width=6, style={'paddingRight': '15px'}),
+                                dbc.Col([
+                                    html.Label('Adjust Di Value Changes:'),
+                                    dcc.Slider(
+                                        id='di-value-slider',
+                                        min=100,
+                                        max=10000,
+                                        step=1,
+                                        value=100,
+                                        marks={100: '100', 10000: '10000'},
+                                        tooltip={"placement": "bottom", "always_visible": True}
+                                    )
+                                ], width=6, style={'marginTop': '15px'}), 
+                            ], ),
                             dbc.Row([
                                 dbc.Col([
                                     html.Div(id='alert', children=[])
@@ -285,42 +328,33 @@ app.layout = html.Div([
                             ]),
                             dash_table.DataTable(
                                 id="data-table",
-                                columns=[
-                                    {"name": "Well Name", "id": "Well Name"},
-                                    {"name": "Start Date", "id": "Start Date"},
-                                    {"name": "End Date", "id": "End Date"},
-                                    {"name": "Start Forecast Date", "id": "Start Forecast Date"},
-                                    {"name": "Cum Date", "id": "Cum Date"},
-                                    {"name": "Cum Prod", "id": "Cum Prod"},
-                                    {"name": "Reserves (bbl)", "id": "Reserves (bbl)"},
-                                    {"name": "b", "id": "b"},
-                                    {"name": "Di", "id": "Di"},
-                                    {"name": "qi", "id": "qi"},
-                                    {"name": "ti", "id": "ti"},
-                                    {"name": "te", "id": "te"},
-                                    {"name": "Final Rate", "id": "Final Rate"},
-                                    {"name": "EUR", "id": "EUR"},
-                                    {"name": "Rate Intervention (bopd)", "id": "Rate Intervention (bopd)"},
-                                    {"name": "Cut Off Date", "id": "Cut Off Date"}
-                                ],
+                                columns=[{"name": col, "id": col} for col in [
+                                    "Well Name", "Start Date", "End Date", "Start Forecast Date", "Cum Date", 
+                                    "Cum Prod", "Reserves (bbl)", "b", "Di", "qi", "ti", "te", 
+                                    "Final Rate", "EUR", "Rate Intervention", "Cut Off Date"
+                                ]],
                                 data=table_data.to_dict("records"),
                                 editable=False,
                                 row_deletable=True,
-                                style_table={'marginTop': '20px'}
-                            ),
+                                page_size=10,
+                                style_table={'marginTop': '30px', 'overflowX': 'auto', 'maxHeight': '500px'},
+                                style_header={'backgroundColor': '#3f849b', 'color': 'white', 'fontWeight': 'bold', 'textAlign': 'center'},
+                                style_data={'border': '1px solid #ddd', 'textAlign': 'center'},
+                                style_data_conditional=[{'if': {'row_index': 'odd'}, 'backgroundColor': '#f2f2f2'}],
+                            ), 
                             html.Div([
                                 html.Button("Download data table", id="download-button", n_clicks=0)
-                            ], style={"display": "flex", "gap": "10px", "marginTop": "10px"}),
+                            ], style={"display": "flex", "justifyContent": "center", "marginTop": "10px"}),
                             dcc.Download(id="download-csv")
                         ]
                     ),
                 ]),
                 html.Div(style={'display': 'flex', 'flexDirection': 'column', 'gap': '10px'}, children=[
-                    html.Div(className='feature-container', style={'border': '1px solid #3F849B', 'padding': '0', 'borderRadius': '16px', 'width': '229px', 'minHeight': '40px'}, children=[
-                        html.H1('Objects', className='Feature-title', style={'color': 'white', 'fontWeight': '700', 'fontSize': '16px', 'padding': '8px 17px', 'backgroundColor': '#3F849B', 'borderRadius': '10px'}),
+                    html.Div(className='feature-container', style={'border': '1px solid #3F849B', 'padding': '0', 'borderRadius': '16px', 'width': '200px', 'minHeight': '40px'}, children=[
+                        html.H1('Objects', className='Feature-title', style={'color': 'white', 'fontWeight': '700', 'fontSize': '18px', 'padding': '8px 17px', 'backgroundColor': '#3F849B', 'borderRadius': '10px'}),
                         html.Div(style={'padding': '10px', 'display': 'flex', 'flexDirection': 'column', 'gap': '10px'}, children=[
-                            html.Div(style={'fontWeight': '400', 'fontSize': '14px', 'color': '#616161', 'display': 'none'}, children=[
-                                html.Label('Select Well:', style={'fontWeight': '400', 'fontSize': '14px', 'color': '#616161'}),
+                            html.Div(style={'fontWeight': '400', 'fontSize': '18px', 'color': '#616161', 'display': 'none'}, children=[
+                                html.Label('Select Well:', style={'fontWeight': '400', 'fontSize': '16px', 'color': '#616161'}),
                                 dcc.Dropdown(
                                     id='well-name', 
                                     options=[{'label': name, 'value': name} for name in sheet_names], 
@@ -376,7 +410,7 @@ def toggle_upload_modal(open_clicks, close_clicks, contents, filename):
     State({'type': 'sub-checkbox', 'name': ALL}, 'value')
 )
 def update_sub_checkboxes(main_checked, sub_label_style, value):
-    defaultStyle = {'display': 'flex', 'marginBottom': '19px', 'gap': '15px', 'align-items': 'center', 'fontWeight': '400', 'fontSize': '14px', 'color': '#616161'}
+    defaultStyle = {'display': 'flex', 'marginBottom': '19px', 'gap': '15px', 'align-items': 'center', 'fontWeight': '400', 'fontSize': '16px', 'color': '#616161'}
     if main_checked[0] != [] :
         return [defaultStyle for _ in sub_label_style], value
     else:
@@ -387,7 +421,7 @@ def update_sub_checkboxes(main_checked, sub_label_style, value):
     Input({'type': 'sub-checkbox', 'name': ALL}, 'value')
 )
 def update_detail_checkboxes(sub_checked):
-    default_style = {'display': 'flex', 'marginBottom': '19px', 'gap': '15px', 'align-items': 'center', 'fontWeight': '400', 'fontSize': '14px', 'color': '#616161'}
+    default_style = {'display': 'flex', 'marginBottom': '19px', 'gap': '15px', 'align-items': 'center', 'fontWeight': '400', 'fontSize': '16px', 'color': '#616161'}
     style = []
     for items in sub_checked:
         if items != []:
@@ -445,12 +479,16 @@ def update_slider(well_name):
     Output('data-table', 'data'),
     Output('selected-b-options', 'value'),
     Output('b-value-slider', 'value'),
+    Output('qi-value-slider', 'value'),
+    Output('di-value-slider', 'value'),
     Input('well-name', 'value'),
     Input('foil-date-picker', 'date'),
     Input('months-end-date', 'value'),
     Input('date-slider', 'value'),
     Input('oil-rate-intervention', 'value'),
     Input('b-value-slider', 'value'),
+    Input('qi-value-slider', 'value'),
+    Input('di-value-slider', 'value'),
     Input('limit-value', 'value'),
     Input('data-table', 'data'),
     Input('legend-status', 'value'),
@@ -460,7 +498,7 @@ def update_slider(well_name):
     State('selected-b-options', 'value'),
     
 )
-def update_plots(well_name, foil_date, months_end_date, slider_value, rate_intervention, b_value, limit_value, rows, legend_status, plot_type, selected_b_options, prev_b_value, prev_selected_b_options):
+def update_plots(well_name, foil_date, months_end_date, slider_value, rate_intervention, b_value, qi_change, di_change, limit_value, rows, legend_status, plot_type, selected_b_options, prev_b_value, prev_selected_b_options):
     if rows is None:
         rows = [] 
 
@@ -496,9 +534,10 @@ def update_plots(well_name, foil_date, months_end_date, slider_value, rate_inter
             dfx.loc[dfx.index[i - 1], 'OIL_CUMULATIVE_PRODUCTION'] + oil_rate
         )
     
-    best_b_oil, oil_exp_di, oil_har_di, oil_hyper_di, oil_exp_model, oil_har_model, oil_hyper_model, df_oil = ccf.process_data(excel_file, well_name, start_date, end_date, 'CORR_OIL_RATE_STBD', 'oil')
+    best_b_oil, oil_exp_di, oil_har_di, oil_hyper_di, oil_exp_model, oil_har_model, oil_hyper_model, df_oil = ccf.process_data(excel_file, well_name, start_date, end_date, qi_change, di_change, 'CORR_OIL_RATE_STBD', 'oil')
     
-    last_rate = dfx[dfx['CORR_OIL_RATE_STBD'] != 0]['CORR_OIL_RATE_STBD'].iloc[-1] + rate_intervention
+    last_rate = dfx[dfx['CORR_OIL_RATE_STBD'] != 0]['CORR_OIL_RATE_STBD'].iloc[-1]
+    current_rate = last_rate + rate_intervention
     qi = last_rate
 
     # foil_date = foil_date.replace(day=1) # Enable this if the data is monthly
@@ -507,8 +546,9 @@ def update_plots(well_name, foil_date, months_end_date, slider_value, rate_inter
     marker_y = dfx[dfx['DATE_STAMP'] == start_date]['CORR_OIL_RATE_STBD'].values[0]
 
     forecast_df = pd.DataFrame({'DATE': date_range, 'TIME': range(len(date_range))})
-    forecast_df['Forecast_Oil_Exponential'] = ccf.exponential_rate(last_rate, oil_exp_di, forecast_df['TIME'])
+    forecast_df['Forecast_Oil_Exponential'] = ccf.exponential_rate(current_rate, oil_exp_di, forecast_df['TIME'])
     
+    # Model category based on b value
     triggered_id = callback_context.triggered[0]['prop_id'].split('.')[0]
     if triggered_id == 'selected-b-options':
         selectedData = selected_b_options
@@ -519,16 +559,15 @@ def update_plots(well_name, foil_date, months_end_date, slider_value, rate_inter
     else:
         selectedData = selected_b_options
     
-    if(b_value != 0):
-        forecast_df['Forecast_Oil_Hyperbolic'] = ccf.hyperbolic_rate(last_rate, oil_hyper_di, b_value, forecast_df['TIME'])
-        forecast_df['Oil_Cumulative_Hyper'] = ccf.cum_hyperbolic(forecast_df['Forecast_Oil_Hyperbolic'].iloc[0], oil_hyper_di, forecast_df['Forecast_Oil_Hyperbolic'], b_value)
-        forecast_df['Oil_Cumulative_Hyper'] += dfx['OIL_CUMULATIVE_PRODUCTION'].iloc[-1]
-        forecast_df['Oil_Cumulative_HyperTotal'] = forecast_df['Oil_Cumulative_Hyper']
+    forecast_df['Forecast_Oil_Hyperbolic'] = ccf.hyperbolic_rate(current_rate, oil_hyper_di, b_value, forecast_df['TIME'])
+    forecast_df['Oil_Cumulative_Hyper'] = ccf.cum_hyperbolic(forecast_df['Forecast_Oil_Hyperbolic'].iloc[0], oil_hyper_di, forecast_df['Forecast_Oil_Hyperbolic'], b_value)
+    forecast_df['Oil_Cumulative_Hyper'] += dfx['OIL_CUMULATIVE_PRODUCTION'].iloc[-1]
+    forecast_df['Oil_Cumulative_HyperTotal'] = forecast_df['Oil_Cumulative_Hyper']
 
-        time_EUR_hyper = forecast_df[forecast_df['Forecast_Oil_Hyperbolic'] >= limit_value].iloc[-1]
-        EUR_hyper = time_EUR_hyper['Oil_Cumulative_HyperTotal']
-        reserves_hyper = EUR_hyper - dfx['OIL_CUMULATIVE_PRODUCTION'].iloc[-1]
-    forecast_df['Forecast_Oil_Harmonic'] = ccf.harmonic_rate(last_rate, oil_har_di, forecast_df['TIME'])
+    time_EUR_hyper = forecast_df[forecast_df['Forecast_Oil_Hyperbolic'] >= limit_value].iloc[-1]
+    EUR_hyper = time_EUR_hyper['Oil_Cumulative_HyperTotal']
+    reserves_hyper = EUR_hyper - dfx['OIL_CUMULATIVE_PRODUCTION'].iloc[-1]
+    forecast_df['Forecast_Oil_Harmonic'] = ccf.harmonic_rate(current_rate, oil_har_di, forecast_df['TIME'])
 
     forecast_df['Oil_Cumulative_Exp'] = ccf.cum_exponential(forecast_df['Forecast_Oil_Exponential'].iloc[0], oil_exp_di, forecast_df['Forecast_Oil_Exponential'])
     forecast_df['Oil_Cumulative_Exp'] += dfx['OIL_CUMULATIVE_PRODUCTION'].iloc[-1]
@@ -630,12 +669,14 @@ def update_plots(well_name, foil_date, months_end_date, slider_value, rate_inter
         )
     
     if scatter:
-        oil_fig.add_scatter(x=[start_date], y=[marker_y], mode='markers', name='Initial Date', marker=dict(color='black', size=7))
+        oil_fig.add_scatter(x=[start_date], y=[marker_y], mode='markers', name='Initial Date', marker=dict(color='black', size=6))
+        oil_fig.add_vline(x=start_date, line=dict(color='black', dash='dash', width=2), name='Initial Date')
 
     oil_fig.update_layout(
         xaxis=dict(title='Date', tickformat='%d-%m-%Y'),
         yaxis=dict(title='Oil Rate (bopd)'),
-        legend_title="Legend"
+        legend_title="Legend",
+        height=700
     )
 
     # Hover Values
@@ -664,7 +705,7 @@ def update_plots(well_name, foil_date, months_end_date, slider_value, rate_inter
         "te": end_date.strftime('%d-%m-%Y'),
         "Final Rate": f"{val_final_rate:,.4f} bopd",
         "EUR": f"{val_eur:,.2f}",
-        "Rate Intervention (bopd)": rate_intervention,
+        "Rate Intervention": rate_intervention,
         "Cut Off Date": crossing_date.strftime('%d-%m-%Y') if not crossed.empty else "N/A"
     }
 
@@ -676,7 +717,7 @@ def update_plots(well_name, foil_date, months_end_date, slider_value, rate_inter
         rows.append(new_row)
     rows = sorted(rows, key=lambda x: float(x['Reserves (bbl)'].replace(',', '')), reverse=True)
 
-    return oil_fig, alert_message, reserves_output, rows, selectedData, b_value
+    return oil_fig, alert_message, reserves_output, rows, selectedData, b_value, qi_change, di_change
 
 @app.callback(
     Output("download-csv", "data"),
